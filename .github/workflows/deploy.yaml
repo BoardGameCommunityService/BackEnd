@@ -1,0 +1,82 @@
+name: Build, Push and Deploy
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1) Checkout
+      - uses: actions/checkout@v4
+
+      # 2) Setup JDK
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      # 3) Build Spring Boot
+      - name: Build JAR
+        run: ./mvnw clean package -DskipTests
+
+      # 4) Docker Build & Push
+      - name: Build and Push Docker image
+        run: |
+          IMAGE=${{ secrets.DOCKER_HUB_USERNAME }}/boardmate-${{ github.ref_name }}:latest
+          echo "Building $IMAGE ..."
+          docker build -t $IMAGE .
+          echo ${{ secrets.DOCKER_HUB_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
+          docker push $IMAGE
+
+      # 5) AWS Credentials
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # 6) Runner IP 가져오기
+      - name: Get GitHub Actions public IP
+        id: ip
+        run: |
+          echo "ip=$(curl -s https://checkip.amazonaws.com)" >> $GITHUB_OUTPUT
+
+      # 7) 보안그룹에 SSH 허용
+      - name: Authorize temporary SSH access
+        run: |
+          aws ec2 authorize-security-group-ingress \
+            --group-id ${{ secrets.AWS_SECURITY_GROUP_ID }} \
+            --protocol tcp \
+            --port 22 \
+            --cidr ${{ steps.ip.outputs.ip }}/32
+          echo "Authorized temporary SSH for ${{ steps.ip.outputs.ip }}"
+
+      # 8) EC2로 SSH 접속 후 배포 실행
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            ENV=${{ github.ref_name }}
+            echo "Deploy script running for $ENV..."
+            bash /srv/boardmate/$ENV/deploy.sh
+
+      # 9) SSH 규칙 제거
+      - name: Revoke SSH access
+        if: always()
+        run: |
+          aws ec2 revoke-security-group-ingress \
+            --group-id ${{ secrets.AWS_SECURITY_GROUP_ID }} \
+            --protocol tcp \
+            --port 22 \
+            --cidr ${{ steps.ip.outputs.ip }}/32
+          echo "Revoked temporary SSH access."
