@@ -3,4 +3,16 @@ spring:
     name: boardmate
 
   profiles:
-    active: dev
+    active: ${SPRING_PROFILES_ACTIVE:dev}  # 기본값: dev
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+server:
+  port: 8080
+
+logging:
+  level:
+    root: INFO
+  file:
+    name: /app/logs/spring.log
