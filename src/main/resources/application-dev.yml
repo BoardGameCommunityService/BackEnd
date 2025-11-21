@@ -13,5 +13,11 @@ spring:
         format_sql: true
     show-sql: true
 
+jwt:
+  secret: your-very-long-secret-key-change-this-please-1234567890
+  access-token-expiration-ms: 3600000      # 1시간
+  refresh-token-expiration-ms: 1209600000  # 14일
+
+
 server:
   port: 8080
