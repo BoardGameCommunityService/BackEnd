@@ -1,4 +1,3 @@
-// src/main/java/com/boardmate/service/UserService.java
 package com.boardmate.service;
 
 import com.boardmate.config.jwt.JwtTokenProvider;
