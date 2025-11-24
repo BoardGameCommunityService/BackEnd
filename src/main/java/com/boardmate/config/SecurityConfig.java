@@ -29,7 +29,11 @@ public class SecurityConfig {
                         // NextAuth가 처음 로그인 후 유저를 동기화하기 위해 부르는 API는 공개
                         .requestMatchers(
                                 "/api/auth/sync-from-nextauth",
-                                "/db-check"
+                                "/db-check",
+                                // Swagger UI
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-resources/**"
                         ).permitAll()
                         // 나머지는 NextAuth JWT 필요
                         .anyRequest().authenticated()
