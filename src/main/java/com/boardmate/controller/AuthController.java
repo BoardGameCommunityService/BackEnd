@@ -1,4 +1,3 @@
-// src/main/java/com/boardmate/controller/AuthController.java
 package com.boardmate.controller;
 
 import com.boardmate.config.jwt.JwtTokenProvider;

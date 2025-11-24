@@ -1,6 +1,5 @@
 package com.boardmate.controller;
 
-import com.boardmate.domain.meeting.Meeting;
 import com.boardmate.domain.user.User;
 import com.boardmate.dto.meeting.CreateMeetingRequest;
 import com.boardmate.service.MeetingService;

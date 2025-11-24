@@ -1,4 +1,3 @@
-// src/main/java/com/boardmate/repository/UserRepository.java
 package com.boardmate.repository;
 
 import com.boardmate.domain.user.User;

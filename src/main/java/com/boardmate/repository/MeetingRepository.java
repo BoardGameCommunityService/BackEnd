@@ -7,5 +7,4 @@ import java.util.List;
 
 public interface MeetingRepository extends JpaRepository<Meeting, Long> {
 
-    List<Meeting> findAllByStatusOrderByCreatedAtDesc(String status);
 }

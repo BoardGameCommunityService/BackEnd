@@ -1,4 +1,3 @@
-// src/main/java/com/boardmate/config/jwt/JwtTokenProvider.java
 package com.boardmate.config.jwt;
 
 import io.jsonwebtoken.*;
