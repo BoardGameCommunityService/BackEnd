@@ -14,9 +14,9 @@ spring:
     show-sql: true
 
 jwt:
-  secret: your-very-long-secret-key-change-this-please-1234567890
-  access-token-expiration-ms: 3600000      # 1시간
-  refresh-token-expiration-ms: 1209600000  # 14일
+  secret: ${NEXTAUTH_SECRET}    # NextAuth와 같은 값
+  access-token-expiration-ms: 3600000
+  refresh-token-expiration-ms: 1209600000
 
 
 server:
