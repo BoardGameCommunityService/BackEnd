@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -25,8 +26,7 @@ public class UserService {
      */
     @Transactional
     public SocialLoginResponse socialLogin(SocialLoginRequest req) {
-        Optional<User> optionalUser =
-                userRepository.findByProviderAndSocialId(req.getProvider(), req.getSocialId());
+        Optional<User> optionalUser = userRepository.findByProviderAndSocialId(req.getProvider(), req.getSocialId());
 
         User user = optionalUser
                 .map(u -> {
@@ -45,8 +45,7 @@ public class UserService {
                                 .profileImageUrl(req.getProfileImageUrl())
                                 .role("USER")
                                 .isActive(true)
-                                .build()
-                ));
+                                .build()));
 
         // ⬇ 이 부분은 "백엔드 JWT" 발급 (NextAuth 구조에서는 안 써도 됨)
         String accessToken = jwtTokenProvider.createAccessToken(user.getId(), user.getRole());
@@ -61,15 +60,14 @@ public class UserService {
                 user.isProfileCompleted(),
                 accessToken,
                 refreshToken,
-                expiresAt
-        );
+                expiresAt);
     }
 
     /**
      * ✅ NextAuth에서만 호출하는 동기화용 메서드
-     *  - 유저를 생성/조회하는 로직은 socialLogin() 재사용
-     *  - 반환 값에서 access/refresh 토큰은 지워서 돌려줌
-     *  - NextAuth는 userId만 뽑아서 자기 JWT에 심어 쓰면 됨
+     * - 유저를 생성/조회하는 로직은 socialLogin() 재사용
+     * - 반환 값에서 access/refresh 토큰은 지워서 돌려줌
+     * - NextAuth는 userId만 뽑아서 자기 JWT에 심어 쓰면 됨
      */
     @Transactional
     public SocialLoginResponse syncUserFromNextAuth(SocialLoginRequest req) {
@@ -88,5 +86,13 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         user.updateProfile(req.getNickname(), req.getGender(), req.getRegion());
+    }
+
+    /**
+     * 테스트/개발용: 전체 사용자 목록 조회
+     */
+    @Transactional(readOnly = true)
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
     }
 }

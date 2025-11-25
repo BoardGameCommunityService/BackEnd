@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
-@Tag(name = "모집 참가", description = "보드게임 모집 참가 신청 관련 API")
+@Tag(name = "모집참가", description = "보드게임 모집 참가 신청 관련 API")
 @RestController
 @RequestMapping("/api/meetings/{meetingId}/participants")
 @RequiredArgsConstructor
@@ -24,16 +24,12 @@ public class MeetingParticipantController {
 
     private final MeetingParticipantService participantService;
 
-    @Operation(
-        summary = "모집 참가 신청",
-        description = "특정 보드게임 모집에 참가 신청을 합니다. JWT 인증이 필요합니다."
-    )
+    @Operation(summary = "모집 참가 신청", description = "특정 보드게임 모집에 참가 신청을 합니다. JWT 인증이 필요합니다.")
     @ApiResponse(responseCode = "200", description = "참가 신청 성공")
     @PostMapping
     public ResponseEntity<?> apply(
             @Parameter(hidden = true) @AuthenticationPrincipal User user,
-            @Parameter(description = "모집 ID", example = "1") @PathVariable Long meetingId
-    ) {
+            @Parameter(description = "모집 ID", example = "1") @PathVariable Long meetingId) {
         participantService.apply(meetingId, user.getId());
         return ResponseEntity.ok(Map.of("message", "신청 완료"));
     }
