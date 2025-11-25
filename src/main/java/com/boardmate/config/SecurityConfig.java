@@ -22,26 +22,23 @@ public class SecurityConfig {
 
         http
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // NextAuth가 처음 로그인 후 유저를 동기화하기 위해 부르는 API는 공개
                         .requestMatchers(
                                 "/api/auth/sync-from-nextauth",
+                                "/api/auth/login", // Swagger 테스트용 로그인 API
                                 "/db-check",
                                 // Swagger UI
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/swagger-resources/**"
-                        ).permitAll()
+                                "/swagger-resources/**")
+                        .permitAll()
                         // 나머지는 NextAuth JWT 필요
-                        .anyRequest().authenticated()
-                )
+                        .anyRequest().authenticated())
                 .addFilterBefore(
                         jwtAuthenticationFilter,
-                        UsernamePasswordAuthenticationFilter.class
-                );
+                        UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
