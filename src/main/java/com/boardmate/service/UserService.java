@@ -75,11 +75,6 @@ public class UserService {
     public SocialLoginResponse syncUserFromNextAuth(SocialLoginRequest req) {
         SocialLoginResponse response = socialLogin(req);
 
-        // NextAuth 기준에선 우리 JWT 안 쓸 거니까 깔끔하게 제거
-        response.setAccessToken(null);
-        response.setRefreshToken(null);
-        response.setAccessTokenExpiresAt(0L);
-
         return response;
     }
 
