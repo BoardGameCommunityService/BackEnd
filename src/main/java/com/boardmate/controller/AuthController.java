@@ -25,8 +25,7 @@ public class AuthController {
      */
     @PostMapping("/sync-from-nextauth")
     public ResponseEntity<SocialLoginResponse> syncFromNextAuth(
-            @RequestBody SocialLoginRequest request
-    ) {
+            @RequestBody SocialLoginRequest request) {
         SocialLoginResponse response = userService.syncUserFromNextAuth(request);
         return ResponseEntity.ok(response);
     }
@@ -38,8 +37,7 @@ public class AuthController {
     @PostMapping("/complete-signup")
     public ResponseEntity<Void> completeSignup(
             @RequestHeader("Authorization") String authHeader,
-            @RequestBody CompleteSignupRequest request
-    ) {
+            @RequestBody CompleteSignupRequest request) {
         String token = authHeader.replace("Bearer ", "");
         Claims claims = jwtTokenProvider.parseToken(token).getPayload();
         Long userId = Long.parseLong(claims.getSubject());
