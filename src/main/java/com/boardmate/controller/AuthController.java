@@ -32,15 +32,6 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "소셜 로그인 (테스트용)", description = "Swagger 테스트를 위한 소셜 로그인 API입니다. 백엔드 자체 JWT를 발급합니다.")
-    @ApiResponse(responseCode = "200", description = "로그인 성공, JWT 토큰 발급")
-    @PostMapping("/login")
-    public ResponseEntity<SocialLoginResponse> login(
-            @RequestBody SocialLoginRequest request) {
-        SocialLoginResponse response = userService.socialLogin(request);
-        return ResponseEntity.ok(response);
-    }
-
     @Operation(summary = "회원가입 완료", description = "소셜 로그인 후 추가 정보(닉네임, 생년월일)를 입력하여 회원가입을 완료합니다. JWT 토큰이 필요합니다.")
     @ApiResponse(responseCode = "200", description = "회원가입 완료 성공")
     @PostMapping("/complete-signup")

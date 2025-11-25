@@ -27,7 +27,7 @@ public class SecurityConfig {
                         // NextAuth가 처음 로그인 후 유저를 동기화하기 위해 부르는 API는 공개
                         .requestMatchers(
                                 "/api/auth/sync-from-nextauth",
-                                "/api/auth/login", // Swagger 테스트용 로그인 API
+                                "/api/test/**", // 테스트 API
                                 "/db-check",
                                 // Swagger UI
                                 "/swagger-ui/**",

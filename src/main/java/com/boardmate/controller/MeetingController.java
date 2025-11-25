@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
-@Tag(name = "모집(Meeting)", description = "보드게임 모집 관련 API")
+@Tag(name = "모집", description = "보드게임 모집 관련 API")
 @RestController
 @RequestMapping("/api/meetings")
 @RequiredArgsConstructor
@@ -27,8 +27,7 @@ public class MeetingController {
     @PostMapping
     public ResponseEntity<?> create(
             @Parameter(hidden = true) @AuthenticationPrincipal User user,
-            @RequestBody CreateMeetingRequest req
-    ) {
+            @RequestBody CreateMeetingRequest req) {
         Long id = meetingService.createMeeting(user.getId(), req);
         return ResponseEntity.ok(Map.of("meetingId", id));
     }
@@ -37,9 +36,7 @@ public class MeetingController {
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping("/{id}")
     public ResponseEntity<?> detail(
-            @Parameter(description = "모집 ID", example = "1") @PathVariable Long id
-    ) {
+            @Parameter(description = "모집 ID", example = "1") @PathVariable Long id) {
         return ResponseEntity.ok(meetingService.getDetail(id));
     }
 }
-
