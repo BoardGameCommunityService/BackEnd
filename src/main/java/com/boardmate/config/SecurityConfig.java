@@ -29,6 +29,7 @@ public class SecurityConfig {
                                 "/api/auth/sync-from-nextauth",
                                 "/api/test/**", // 테스트 API
                                 "/db-check",
+                                "/mongo-check",
                                 // Swagger UI
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
