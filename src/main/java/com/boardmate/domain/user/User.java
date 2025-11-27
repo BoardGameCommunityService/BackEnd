@@ -10,33 +10,34 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long id;
 
     @Column(nullable = false, length = 255, unique = true)
-    private String email;          // 카카오/구글 이메일
+    private String email; // 카카오/구글 이메일
 
     @Column(length = 255)
-    private String nickname;       // 회원 정보 입력 화면에서 받기
+    private String nickname; // 회원 정보 입력 화면에서 받기
 
     @Column(name = "social_id", length = 500, nullable = false)
-    private String socialId;       // provider가 주는 고유 ID
+    private String socialId; // provider가 주는 고유 ID
 
     @Column(name = "provider", length = 50, nullable = false)
-    private String provider;       // "kakao", "google"
+    private String provider; // "kakao", "google"
 
     @Column(length = 50)
-    private String gender;         // "MALE", "FEMALE" 등
+    private String gender; // "MALE", "FEMALE" 등
 
     @Column(length = 255)
-    private String region;         // "서울특별시 강남구" 같은 문자열
+    private String region; // "서울특별시 강남구" 같은 문자열
 
     @Column(name = "profile_image_url", length = 500)
     private String profileImageUrl;
 
     @Column(length = 50)
-    private String role;           // "USER", "ADMIN"
+    private String role; // "USER", "ADMIN"
 
     private Boolean isActive;
 
@@ -45,8 +46,8 @@ public class User {
 
     @Builder
     public User(String email, String nickname, String socialId, String provider,
-                String gender, String region, String profileImageUrl,
-                String role, Boolean isActive) {
+            String gender, String region, String profileImageUrl,
+            String role, Boolean isActive) {
         this.email = email;
         this.nickname = nickname;
         this.socialId = socialId;
@@ -62,8 +63,10 @@ public class User {
     public void onCreate() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = this.createdAt;
-        if (this.role == null) this.role = "USER";
-        if (this.isActive == null) this.isActive = true;
+        if (this.role == null)
+            this.role = "USER";
+        if (this.isActive == null)
+            this.isActive = true;
     }
 
     @PreUpdate
@@ -83,5 +86,13 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public void setProvider(String provider) {
+        this.provider = provider;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
     }
 }

@@ -30,8 +30,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(
             HttpServletRequest request,
             HttpServletResponse response,
-            FilterChain filterChain
-    ) throws ServletException, IOException {
+            FilterChain filterChain) throws ServletException, IOException {
 
         String header = request.getHeader("Authorization");
 
@@ -39,11 +38,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = header.substring(7);
 
             try {
-                // ✅ NextAuth가 서명한 JWT 검증
+                // JWT 검증
                 Jws<Claims> jws = jwtTokenProvider.parseToken(token);
                 Claims claims = jws.getPayload();
 
-                // ✅ NextAuth jwt 콜백에서 token.userId = 백엔드 userId 로 넣어놨다고 가정
+                // 토큰 클레임에 userId가 들어있다고 가정
                 Object userIdClaim = claims.get("userId");
                 Long userId = null;
 
@@ -55,11 +54,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     userId = Long.parseLong(s);
                 }
 
-                // (옵션) 예전 방식처럼 sub에 userId가 들어오는 것도 함께 지원하고 싶다면:
                 if (userId == null && claims.getSubject() != null) {
                     try {
                         userId = Long.parseLong(claims.getSubject());
-                    } catch (NumberFormatException ignored) {}
+                    } catch (NumberFormatException ignored) {
+                    }
                 }
 
                 if (userId != null) {
@@ -74,10 +73,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         var authorities = List.of(new SimpleGrantedAuthority(roleName));
 
                         var authentication = new UsernamePasswordAuthenticationToken(
-                                user,      // principal
-                                null,      // credentials
-                                authorities
-                        );
+                                user, // principal
+                                null, // credentials
+                                authorities);
 
                         SecurityContextHolder.getContext().setAuthentication(authentication);
                     }

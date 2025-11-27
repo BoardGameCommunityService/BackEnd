@@ -36,7 +36,15 @@ public class SwaggerConfig {
     private Info apiInfo() {
         return new Info()
                 .title("BoardMate API")
-                .description("보드게임 커뮤니티 플랫폼 API 문서")
+                .description("보드게임 커뮤니티 플랫폼 API 문서"
+                        + "<br><br>" +
+                        "/api/auth/sync-from-nextauth : NextAuth가 처음 로그인 후 유저를 동기화하기 위해 부르는 API입니다.(JWT 포함 반환)"
+                        + "<br><br>" +
+                        "해당 API는 메일 주소 기반으로 사용자를 식별하며, 이미 가입된 사용자라면 기존 정보를 반환합니다. 신규 사용자라면 DB에 저장 후 정보를 반환합니다."
+                        + "<br><br>" +
+                        "모든 API는 JWT 인증이 필요합니다(테스트, 시스템 제외)"
+                        + "<br><br>" +
+                        "Swagger UI 우측 상단의 'Authorize' 버튼을 클릭하여 발급받은 JWT 토큰을 입력해야 합니다.")
                 .version("1.0.0");
     }
 

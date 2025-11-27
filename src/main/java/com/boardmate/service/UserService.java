@@ -26,28 +26,26 @@ public class UserService {
      */
     @Transactional
     public SocialLoginResponse socialLogin(SocialLoginRequest req) {
-        Optional<User> optionalUser = userRepository.findByProviderAndSocialId(req.getProvider(), req.getSocialId());
 
-        User user = optionalUser
-                .map(u -> {
-                    // 이메일 등 최신 정보로 업데이트
-                    if (req.getEmail() != null) {
-                        u.setEmail(req.getEmail());
-                    }
-                    return u;
-                })
-                .orElseGet(() -> userRepository.save(
-                        User.builder()
-                                .email(req.getEmail())
-                                .nickname(req.getNickname())
-                                .socialId(req.getSocialId())
-                                .provider(req.getProvider())
-                                .profileImageUrl(req.getProfileImageUrl())
-                                .role("USER")
-                                .isActive(true)
-                                .build()));
+        Optional<User> optionalUser = userRepository.findByEmail(req.getEmail());
+        boolean alreadyRegistered = optionalUser.isPresent();
 
-        // ⬇ 이 부분은 "백엔드 JWT" 발급 (NextAuth 구조에서는 안 써도 됨)
+        User user;
+        if (alreadyRegistered) {
+            user = optionalUser.get();
+        } else {
+            user = User.builder()
+                    .email(req.getEmail())
+                    .nickname(req.getNickname())
+                    .socialId(req.getSocialId())
+                    .provider(req.getProvider())
+                    .profileImageUrl(req.getProfileImageUrl())
+                    .role("USER")
+                    .isActive(true)
+                    .build();
+            userRepository.save(user);
+        }
+
         String accessToken = jwtTokenProvider.createAccessToken(user.getId(), user.getRole());
         String refreshToken = jwtTokenProvider.createRefreshToken(user.getId());
         long expiresAt = System.currentTimeMillis() + 1000L * 60 * 60; // 1시간
@@ -60,7 +58,8 @@ public class UserService {
                 user.isProfileCompleted(),
                 accessToken,
                 refreshToken,
-                expiresAt);
+                expiresAt,
+                alreadyRegistered);
     }
 
     /**
@@ -71,13 +70,7 @@ public class UserService {
      */
     @Transactional
     public SocialLoginResponse syncUserFromNextAuth(SocialLoginRequest req) {
-        SocialLoginResponse response = socialLogin(req);
-
-        response.setAccessToken(null);
-        response.setRefreshToken(null);
-        response.setAccessTokenExpiresAt(0L);
-
-        return response;
+        return socialLogin(req);
     }
 
     @Transactional
