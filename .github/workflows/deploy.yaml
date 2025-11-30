@@ -80,3 +80,35 @@ jobs:
             --port 22 \
             --cidr ${{ steps.ip.outputs.ip }}/32
           echo "Revoked temporary SSH access."
+
+      # 10) Discord 알림 (성공 시)
+      - name: Notify Discord (success)
+        if: success()
+        env:
+          WEBHOOK_DEV: ${{ secrets.DISCORD_WEBHOOK_DEV }}
+          WEBHOOK_PROD: ${{ secrets.DISCORD_WEBHOOK_PROD }}
+        run: |
+          BRANCH="${{ github.ref_name }}"
+          if [ "$BRANCH" = "dev" ]; then WEBHOOK="$WEBHOOK_DEV"; else WEBHOOK="$WEBHOOK_PROD"; fi
+          if [ -z "$WEBHOOK" ]; then echo "No Discord webhook set for $BRANCH"; exit 0; fi
+          IMAGE="${{ secrets.DOCKER_HUB_USERNAME }}/boardmate-${{ github.ref_name }}:latest"
+          COMMIT="${{ github.sha }}"
+          MESSAGE="✅ Deploy succeeded | branch: $BRANCH | image: $IMAGE | commit: ${COMMIT:0:7}"
+          curl -sS -H "Content-Type: application/json" \
+            -d "{\"content\": \"$MESSAGE\"}" "$WEBHOOK"
+
+      # 11) Discord 알림 (실패 시)
+      - name: Notify Discord (failure)
+        if: failure()
+        env:
+          WEBHOOK_DEV: ${{ secrets.DISCORD_WEBHOOK_DEV }}
+          WEBHOOK_PROD: ${{ secrets.DISCORD_WEBHOOK_PROD }}
+        run: |
+          BRANCH="${{ github.ref_name }}"
+          if [ "$BRANCH" = "dev" ]; then WEBHOOK="$WEBHOOK_DEV"; else WEBHOOK="$WEBHOOK_PROD"; fi
+          if [ -z "$WEBHOOK" ]; then echo "No Discord webhook set for $BRANCH"; exit 0; fi
+          IMAGE="${{ secrets.DOCKER_HUB_USERNAME }}/boardmate-${{ github.ref_name }}:latest"
+          COMMIT="${{ github.sha }}"
+          MESSAGE="❌ Deploy failed | branch: $BRANCH | image: $IMAGE | commit: ${COMMIT:0:7}"
+          curl -sS -H "Content-Type: application/json" \
+            -d "{\"content\": \"$MESSAGE\"}" "$WEBHOOK"
