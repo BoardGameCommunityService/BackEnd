@@ -16,6 +16,9 @@ springdoc:
     persist-authorization: true
     doc-expansion: none
 
+cors:
+  allowed-origin: ${CORS_ALLOWED_ORIGIN}
+
 logging:
   level:
     root: INFO
