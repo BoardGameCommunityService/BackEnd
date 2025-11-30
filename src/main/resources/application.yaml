@@ -7,6 +7,17 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: ${DB_USER}
+    password: ${DB_PASS}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
 
 server:
   port: 8080
@@ -24,3 +35,8 @@ logging:
     root: INFO
   file:
     name: /app/logs/spring.log
+
+jwt:
+  secret: ${NEXTAUTH_SECRET}
+  access-token-expiration-ms: 3600000
+  refresh-token-expiration-ms: 1209600000
