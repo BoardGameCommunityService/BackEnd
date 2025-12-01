@@ -44,6 +44,12 @@ public class User {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    // 약관 동의 (필수: service, privacy / 선택: location)
+    private Boolean consentService;
+    private Boolean consentPrivacy;
+    private Boolean consentLocation;
+    private LocalDateTime consentAgreedAt;
+
     @Builder
     public User(String email, String nickname, String socialId, String provider,
             String gender, String region, String profileImageUrl,
@@ -82,6 +88,13 @@ public class User {
         this.nickname = nickname;
         this.gender = gender;
         this.region = region;
+    }
+
+    public void updateConsent(Boolean service, Boolean privacy, Boolean location) {
+        this.consentService = service;
+        this.consentPrivacy = privacy;
+        this.consentLocation = location;
+        this.consentAgreedAt = LocalDateTime.now();
     }
 
     public void setEmail(String email) {
