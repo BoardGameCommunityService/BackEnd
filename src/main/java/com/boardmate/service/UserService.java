@@ -79,6 +79,12 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         user.updateProfile(req.getNickname(), req.getGender(), req.getRegion());
+
+        if (req.getConsent() != null) {
+            CompleteSignupRequest.Consent c = req.getConsent();
+            // 서버 시간으로 동의 시각 저장
+            user.updateConsent(c.getService(), c.getPrivacy(), c.getLocation());
+        }
     }
 
     /**
