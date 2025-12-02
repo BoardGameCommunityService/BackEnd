@@ -50,6 +50,10 @@ public class User {
     private Boolean consentLocation;
     private LocalDateTime consentAgreedAt;
 
+    // 토큰 재발급용 리프레시 토큰 저장
+    @Column(length = 500)
+    private String refreshToken;
+
     @Builder
     public User(String email, String nickname, String socialId, String provider,
             String gender, String region, String profileImageUrl,
@@ -107,5 +111,13 @@ public class User {
 
     public void setNickname(String nickname) {
         this.nickname = nickname;
+    }
+
+    public void updateRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
+    public void clearRefreshToken() {
+        this.refreshToken = null;
     }
 }

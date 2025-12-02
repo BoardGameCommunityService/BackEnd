@@ -5,6 +5,7 @@ import com.boardmate.domain.user.User;
 import com.boardmate.dto.auth.CompleteSignupRequest;
 import com.boardmate.dto.auth.SocialLoginRequest;
 import com.boardmate.dto.auth.SocialLoginResponse;
+import com.boardmate.dto.auth.TokenRefreshResponse;
 import com.boardmate.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -50,6 +51,10 @@ public class UserService {
         String refreshToken = jwtTokenProvider.createRefreshToken(user.getId());
         long expiresAt = System.currentTimeMillis() + 1000L * 60 * 60; // 1시간
 
+        // 리프레시 토큰 DB에 저장
+        user.updateRefreshToken(refreshToken);
+        userRepository.save(user);
+
         return new SocialLoginResponse(
                 user.getId(),
                 user.getEmail(),
@@ -74,7 +79,7 @@ public class UserService {
     }
 
     @Transactional
-    public void completeSignup(Long userId, CompleteSignupRequest req) {
+    public String completeSignup(Long userId, CompleteSignupRequest req) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
@@ -85,6 +90,13 @@ public class UserService {
             // 서버 시간으로 동의 시각 저장
             user.updateConsent(c.getService(), c.getPrivacy(), c.getLocation());
         }
+
+        // 리프레시 토큰 생성 및 DB 저장
+        String refreshToken = jwtTokenProvider.createRefreshToken(user.getId());
+        user.updateRefreshToken(refreshToken);
+        userRepository.save(user);
+
+        return refreshToken;
     }
 
     /**
@@ -93,5 +105,54 @@ public class UserService {
     @Transactional(readOnly = true)
     public List<User> getAllUsers() {
         return userRepository.findAll();
+    }
+
+    /**
+     * 테스트/개발용: 아이디별 사용자 조회
+     */
+    @Transactional(readOnly = true)
+    public Optional<User> getUserById(Long id) {
+        return userRepository.findById(id);
+    }
+
+    /**
+     * 테스트/개발용: 메일별 사용자 조회
+     */
+    @Transactional(readOnly = true)
+    public Optional<User> getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    /**
+     * 리프레시 토큰으로 액세스 토큰 재발급 (+ 리프레시 토큰 rotation)
+     */
+    @Transactional
+    public TokenRefreshResponse refreshToken(String refreshToken) {
+        // 1) 리프레시 토큰 파싱 및 유효성 검증
+        Long userId;
+        try {
+            userId = Long.parseLong(jwtTokenProvider.parseToken(refreshToken).getPayload().getSubject());
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid or expired refresh token");
+        }
+
+        // 2) 사용자 조회 및 DB에 저장된 리프레시 토큰과 비교
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if (user.getRefreshToken() == null || !user.getRefreshToken().equals(refreshToken)) {
+            throw new IllegalArgumentException("Refresh token does not match or has been revoked");
+        }
+
+        // 3) 새 액세스 토큰 및 새 리프레시 토큰 발급 (rotation)
+        String newAccessToken = jwtTokenProvider.createAccessToken(user.getId(), user.getRole());
+        String newRefreshToken = jwtTokenProvider.createRefreshToken(user.getId());
+        long expiresAt = System.currentTimeMillis() + 1000L * 60 * 60; // 1시간
+
+        // 4) 새 리프레시 토큰 DB에 저장
+        user.updateRefreshToken(newRefreshToken);
+        userRepository.save(user);
+
+        return new TokenRefreshResponse(newAccessToken, newRefreshToken, expiresAt);
     }
 }
