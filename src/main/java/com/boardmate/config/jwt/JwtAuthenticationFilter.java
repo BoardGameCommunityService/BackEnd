@@ -2,7 +2,9 @@ package com.boardmate.config.jwt;
 
 import com.boardmate.domain.user.User;
 import com.boardmate.repository.UserRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -16,7 +18,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Component
@@ -31,6 +35,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletRequest request,
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
+
+        String requestURI = request.getRequestURI();
+
+        // /api/test/** 경로는 토큰 검증 건너뛰기 (만료되어도 접근 가능)
+        if (requestURI.startsWith("/api/test/")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         String header = request.getHeader("Authorization");
 
@@ -81,12 +93,36 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     }
                 }
 
-            } catch (Exception ex) {
-                // 토큰이 유효하지 않으면 인증 정보 비우고 넘어감 → 나중에 401
+            } catch (ExpiredJwtException ex) {
+                // 액세스 토큰 만료 → 401 (재인증 가능)
                 SecurityContextHolder.clearContext();
+                sendErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED,
+                        "TOKEN_EXPIRED", "Access token has expired. Please refresh your token.");
+                return;
+            } catch (Exception ex) {
+                // 기타 토큰 오류 (변조, 형식 오류 등) → 403 (재인증해도 접근 불가)
+                SecurityContextHolder.clearContext();
+                sendErrorResponse(response, HttpServletResponse.SC_FORBIDDEN,
+                        "INVALID_TOKEN", "Invalid or malformed token.");
+                return;
             }
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private void sendErrorResponse(HttpServletResponse response, int status, String error, String message)
+            throws IOException {
+        response.setStatus(status);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("error", error);
+        errorResponse.put("message", message);
+        errorResponse.put("timestamp", System.currentTimeMillis());
+
+        ObjectMapper mapper = new ObjectMapper();
+        response.getWriter().write(mapper.writeValueAsString(errorResponse));
     }
 }

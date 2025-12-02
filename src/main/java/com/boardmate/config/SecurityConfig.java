@@ -22,6 +22,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    // Refresh Token Cookie 설정 상수
+    public static final String REFRESH_TOKEN_COOKIE_NAME = "refreshToken";
+    public static final int REFRESH_TOKEN_COOKIE_MAX_AGE = 14 * 24 * 60 * 60; // 14일 (초 단위)
+
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Value("${cors.allowed-origin}")
@@ -38,6 +42,7 @@ public class SecurityConfig {
                         // NextAuth가 처음 로그인 후 유저를 동기화하기 위해 부르는 API는 공개
                         .requestMatchers(
                                 "/api/auth/sync-from-nextauth",
+                                "/api/auth/refresh", // 토큰 재발급 (인증 불필요)
                                 "/api/test/**", // 테스트 API
                                 "/db-check",
                                 "/mongo-check",
