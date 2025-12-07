@@ -8,12 +8,16 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "games")
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class Game {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "game_id")
     private Long id;
 
     private String nameKo;
