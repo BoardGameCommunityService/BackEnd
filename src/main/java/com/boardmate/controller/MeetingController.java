@@ -32,6 +32,13 @@ public class MeetingController {
         return ResponseEntity.ok(Map.of("meetingId", id));
     }
 
+    @Operation(summary = "모집 목록 조회", description = "모든 보드게임 모집 목록을 조회합니다. 인증 불필요.")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping
+    public ResponseEntity<?> list() {
+        return ResponseEntity.ok(meetingService.getMeetingList());
+    }
+
     @Operation(summary = "모집 상세 조회", description = "모집 ID로 상세 정보를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping("/{id}")
