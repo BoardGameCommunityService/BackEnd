@@ -120,4 +120,17 @@ public class User {
     public void clearRefreshToken() {
         this.refreshToken = null;
     }
+
+    public void updateUserInfo(String nickname, String gender, String region) {
+        if (nickname != null && !nickname.isBlank()) {
+            this.nickname = nickname;
+        }
+        if (gender != null && !gender.isBlank()) {
+            this.gender = gender;
+        }
+        if (region != null && !region.isBlank()) {
+            this.region = region;
+        }
+        this.updatedAt = LocalDateTime.now();
+    }
 }
