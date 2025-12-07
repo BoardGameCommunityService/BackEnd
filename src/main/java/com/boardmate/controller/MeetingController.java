@@ -39,6 +39,14 @@ public class MeetingController {
         return ResponseEntity.ok(meetingService.getMeetingList());
     }
 
+    @Operation(summary = "모집 검색", description = "제목 또는 내용으로 보드게임 모집을 검색합니다. 인증 불필요.")
+    @ApiResponse(responseCode = "200", description = "검색 성공")
+    @GetMapping("/search")
+    public ResponseEntity<?> search(
+            @Parameter(description = "검색 키워드", example = "보드게임") @RequestParam String keyword) {
+        return ResponseEntity.ok(meetingService.searchMeetings(keyword));
+    }
+
     @Operation(summary = "모집 상세 조회", description = "모집 ID로 상세 정보를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping("/{id}")

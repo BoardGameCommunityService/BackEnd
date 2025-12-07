@@ -34,6 +34,17 @@ public class MeetingService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<MeetingDetailResponse> searchMeetings(String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return getMeetingList();
+        }
+        return meetingRepository.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(keyword, keyword)
+                .stream()
+                .map(meeting -> getDetail(meeting.getId()))
+                .toList();
+    }
+
     @Transactional
     public Long createMeeting(Long hostId, CreateMeetingRequest req) {
 

@@ -47,6 +47,7 @@ public class SecurityConfig {
                                 "/db-check",
                                 "/mongo-check",
                                 "/api/meetings", // 게시글 목록 조회 (인증 불필요)
+                                "/api/meetings/search", // 게시글 목록 조회 (인증 불필요)
                                 // Swagger UI
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
