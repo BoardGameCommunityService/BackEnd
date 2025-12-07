@@ -16,7 +16,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Meeting {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "meeting_id")
     private Long id;
 
     // 모임장
@@ -36,7 +38,7 @@ public class Meeting {
     private String content;
 
     @Column(nullable = false)
-    private String ruleLevel;  // ANY | BEGINNER
+    private String ruleLevel; // ANY | BEGINNER
 
     private String regionCode;
 

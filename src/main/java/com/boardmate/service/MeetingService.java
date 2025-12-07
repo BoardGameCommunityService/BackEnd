@@ -27,6 +27,13 @@ public class MeetingService {
     private final GameRepository gameRepository;
     private final MeetingParticipantRepository participantRepository;
 
+    @Transactional(readOnly = true)
+    public List<MeetingDetailResponse> getMeetingList() {
+        return meetingRepository.findAll().stream()
+                .map(meeting -> getDetail(meeting.getId()))
+                .toList();
+    }
+
     @Transactional
     public Long createMeeting(Long hostId, CreateMeetingRequest req) {
 
@@ -66,7 +73,8 @@ public class MeetingService {
     }
 
     private String convertToJson(List<String> tags) {
-        if (tags == null) return "[]";
+        if (tags == null)
+            return "[]";
         try {
             return new ObjectMapper().writeValueAsString(tags);
         } catch (Exception e) {
@@ -81,8 +89,7 @@ public class MeetingService {
                 .orElseThrow(() -> new RuntimeException("Meeting not found"));
 
         int current = participantRepository.countByMeetingIdAndStatus(
-                meetingId, "APPROVED"
-        );
+                meetingId, "APPROVED");
 
         HostSummary hostSummary = HostSummary.builder()
                 .userId(meeting.getHost().getId())
@@ -106,4 +113,3 @@ public class MeetingService {
                 .build();
     }
 }
-
