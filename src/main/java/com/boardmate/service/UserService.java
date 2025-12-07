@@ -6,6 +6,8 @@ import com.boardmate.dto.auth.CompleteSignupRequest;
 import com.boardmate.dto.auth.SocialLoginRequest;
 import com.boardmate.dto.auth.SocialLoginResponse;
 import com.boardmate.dto.auth.TokenRefreshResponse;
+import com.boardmate.dto.user.UpdateUserInfoRequest;
+import com.boardmate.dto.user.UserInfoResponse;
 import com.boardmate.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -154,5 +156,23 @@ public class UserService {
         userRepository.save(user);
 
         return new TokenRefreshResponse(newAccessToken, newRefreshToken, expiresAt);
+    }
+
+    @Transactional(readOnly = true)
+    public UserInfoResponse getUserInfo(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return UserInfoResponse.from(user);
+    }
+
+    @Transactional
+    public UserInfoResponse updateUserInfo(Long userId, UpdateUserInfoRequest req) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.updateUserInfo(req.getNickname(), req.getGender(), req.getRegion());
+        userRepository.save(user);
+
+        return UserInfoResponse.from(user);
     }
 }

@@ -1,0 +1,14 @@
+package com.boardmate.dto.user;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+public class UpdateUserInfoRequest {
+    private String nickname;
+    private String gender;
+    private String region;
+}

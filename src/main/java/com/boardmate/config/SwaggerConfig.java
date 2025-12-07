@@ -53,6 +53,7 @@ public class SwaggerConfig {
         List<String> tagOrder = List.of(
                 "테스트",
                 "인증",
+                "사용자",
                 "모집",
                 "모집참가",
                 "팔로우",
