@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "users")
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User {
 
@@ -39,6 +40,10 @@ public class User {
     private String role;           // "USER", "ADMIN"
 
     private Boolean isActive;
+
+    private Boolean notifyOnMeetingApproved = true;  // 내가 신청한 모임 승인 알림
+    private Boolean notifyOnNewParticipant = true;   // 내가 만든 모임 참가자 알림
+    private Boolean notifyOnInquiryAnswered = true;  // 문의 답변 알림
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

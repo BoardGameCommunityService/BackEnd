@@ -16,27 +16,62 @@ import java.time.LocalDateTime;
                 )
         }
 )
-@Getter  @Setter
+@Getter
+@Setter
 @Builder
-@NoArgsConstructor  @AllArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 @IdClass(MeetingParticipantId.class)
 public class MeetingParticipant {
 
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "meeting_id")
+    @JoinColumn(name = "meeting_id", nullable = false)
     private Meeting meeting;
 
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Column(nullable = false)
-    private String status; // REQUESTED | APPROVED | ...
+    private String status; // REQUESTED / APPROVED / REJECTED
 
     private String note;
 
     private LocalDateTime joinedAt;
     private LocalDateTime updatedAt;
+
+    @PrePersist
+    public void onCreate() {
+        this.joinedAt = LocalDateTime.now();
+        this.updatedAt = this.joinedAt;
+        if (this.status == null) {
+            this.status = "REQUESTED";
+        }
+    }
+
+    @PreUpdate
+    public void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public static MeetingParticipant create(User user, Meeting meeting) {
+        return MeetingParticipant.builder()
+                .user(user)
+                .meeting(meeting)
+                .status("REQUESTED")
+                .joinedAt(LocalDateTime.now())
+                .build();
+    }
+
+    // 승인
+    public void approve() {
+        this.status = "APPROVED";
+    }
+
+    // 거절
+    public void reject() {
+        this.status = "REJECTED";
+    }
 }

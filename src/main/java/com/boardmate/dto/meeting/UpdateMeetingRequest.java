@@ -1,15 +1,17 @@
 package com.boardmate.dto.meeting;
 
 import com.boardmate.domain.meeting.GenderRestriction;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
-public class CreateMeetingRequest {
+@Getter
+@Setter
+public class UpdateMeetingRequest {
 
-    private Long meetingId;
+    private Long gameId;           // 보드게임
 
     private String title;
     private String content;
@@ -19,15 +21,12 @@ public class CreateMeetingRequest {
     private LocalDateTime meetingAt;
 
     private Integer maxParticipants;
-    private Integer currentParticipants;
     private Integer feeEstimate;
 
-    private Double latitude;   // 위도
-    private Double longitude;  // 경도
+    private Double latitude;
+    private Double longitude;
 
     private GenderRestriction genderRestriction;
 
-    private Long gameId;
-
-    private List<String> tags;  // → JSON 문자열로 저장됨
+    private List<String> tags;
 }

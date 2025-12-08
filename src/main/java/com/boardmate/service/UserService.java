@@ -5,6 +5,10 @@ import com.boardmate.domain.user.User;
 import com.boardmate.dto.auth.CompleteSignupRequest;
 import com.boardmate.dto.auth.SocialLoginRequest;
 import com.boardmate.dto.auth.SocialLoginResponse;
+import com.boardmate.dto.user.NotificationSettingsResponse;
+import com.boardmate.dto.user.UpdateNotificationSettingsRequest;
+import com.boardmate.dto.user.UpdateProfileRequest;
+import com.boardmate.dto.user.UserProfileResponse;
 import com.boardmate.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -48,7 +52,6 @@ public class UserService {
                                 .build()
                 ));
 
-        // ⬇ 이 부분은 "백엔드 JWT" 발급 (NextAuth 구조에서는 안 써도 됨)
         String accessToken = jwtTokenProvider.createAccessToken(user.getId(), user.getRole());
         String refreshToken = jwtTokenProvider.createRefreshToken(user.getId());
         long expiresAt = System.currentTimeMillis() + 1000L * 60 * 60; // 1시간
@@ -66,7 +69,7 @@ public class UserService {
     }
 
     /**
-     * ✅ NextAuth에서만 호출하는 동기화용 메서드
+     * NextAuth에서만 호출하는 동기화용 메서드
      *  - 유저를 생성/조회하는 로직은 socialLogin() 재사용
      *  - 반환 값에서 access/refresh 토큰은 지워서 돌려줌
      *  - NextAuth는 userId만 뽑아서 자기 JWT에 심어 쓰면 됨
@@ -85,4 +88,68 @@ public class UserService {
 
         user.updateProfile(req.getNickname(), req.getGender(), req.getRegion());
     }
+
+    @Transactional(readOnly = true)
+    public UserProfileResponse getMyProfile(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        return UserProfileResponse.from(user);
+    }
+
+    @Transactional
+    public UserProfileResponse updateMyProfile(Long userId, UpdateProfileRequest req) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // nickname
+        if (req.getNickname() != null && !req.getNickname().isBlank()) {
+            user.setNickname(req.getNickname());
+        }
+
+        // gender
+        if (req.getGender() != null) {
+            user.setGender(req.getGender());
+        }
+
+        // region
+        if (req.getRegion() != null) {
+            user.setRegion(req.getRegion());
+        }
+
+        // profile image
+        if (req.getProfileImageUrl() != null) {
+            user.setProfileImageUrl(req.getProfileImageUrl());
+        }
+
+        return UserProfileResponse.from(user);
+    }
+
+    @Transactional(readOnly = true)
+    public NotificationSettingsResponse getNotificationSettings(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        return NotificationSettingsResponse.builder()
+                .notifyOnMeetingApproved(user.getNotifyOnMeetingApproved())
+                .notifyOnNewParticipant(user.getNotifyOnNewParticipant())
+                .notifyOnInquiryAnswered(user.getNotifyOnInquiryAnswered())
+                .build();
+    }
+
+    @Transactional
+    public void updateNotificationSettings(Long userId, UpdateNotificationSettingsRequest req) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if (req.getNotifyOnMeetingApproved() != null)
+            user.setNotifyOnMeetingApproved(req.getNotifyOnMeetingApproved());
+
+        if (req.getNotifyOnNewParticipant() != null)
+            user.setNotifyOnNewParticipant(req.getNotifyOnNewParticipant());
+
+        if (req.getNotifyOnInquiryAnswered() != null)
+            user.setNotifyOnInquiryAnswered(req.getNotifyOnInquiryAnswered());
+    }
+
 }

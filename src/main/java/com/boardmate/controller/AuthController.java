@@ -19,7 +19,7 @@ public class AuthController {
     private final UserService userService;
 
     /**
-     * ✅ NextAuth 서버에서만 호출하는 유저 동기화용 API
+     * NextAuth 서버에서만 호출하는 유저 동기화용 API
      *  - body: SocialLoginRequest
      *  - response: SocialLoginResponse (NextAuth는 userId만 사용)
      */
