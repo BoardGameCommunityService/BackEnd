@@ -6,10 +6,12 @@ import com.boardmate.dto.meeting.CreateMeetingRequest;
 import com.boardmate.dto.meeting.HostSummary;
 import com.boardmate.dto.meeting.MeetingDetailResponse;
 import com.boardmate.dto.meeting.ParticipantSummary;
+import com.boardmate.dto.meeting.PopularItem;
 import com.boardmate.repository.MeetingParticipantRepository;
 import com.boardmate.repository.MeetingRepository;
 import com.boardmate.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,7 +20,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -128,5 +134,60 @@ public class MeetingService {
                 .participants(participants)
                 .host(hostSummary)
                 .build();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PopularItem> getPopularGames(int limit) {
+        List<Meeting> meetings = meetingRepository.findAll();
+        Map<String, Long> counter = new HashMap<>();
+
+        for (Meeting meeting : meetings) {
+            for (String game : parseGameNames(meeting.getGameNamesJson())) {
+                String key = game == null ? "" : game.trim();
+                if (key.isEmpty()) {
+                    continue;
+                }
+                counter.put(key, counter.getOrDefault(key, 0L) + 1);
+            }
+        }
+
+        return counter.entrySet().stream()
+                .sorted((a, b) -> Long.compare(b.getValue(), a.getValue()))
+                .limit(limit)
+                .map(e -> PopularItem.builder().name(e.getKey()).count(e.getValue()).build())
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<PopularItem> getPopularRegions(int limit) {
+        List<Meeting> meetings = meetingRepository.findAll();
+        Map<String, Long> counter = new HashMap<>();
+
+        for (Meeting meeting : meetings) {
+            String place = meeting.getMeetingPlace();
+            String key = place == null ? "" : place.trim();
+            if (key.isEmpty()) {
+                continue;
+            }
+            counter.put(key, counter.getOrDefault(key, 0L) + 1);
+        }
+
+        return counter.entrySet().stream()
+                .sorted((a, b) -> Long.compare(b.getValue(), a.getValue()))
+                .limit(limit)
+                .map(e -> PopularItem.builder().name(e.getKey()).count(e.getValue()).build())
+                .collect(Collectors.toList());
+    }
+
+    private List<String> parseGameNames(String gameNamesJson) {
+        if (gameNamesJson == null || gameNamesJson.isBlank()) {
+            return Collections.emptyList();
+        }
+        try {
+            return new ObjectMapper().readValue(gameNamesJson, new TypeReference<List<String>>() {
+            });
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
     }
 }
