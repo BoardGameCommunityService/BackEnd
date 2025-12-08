@@ -18,8 +18,7 @@ public class JwtTokenProvider {
     public JwtTokenProvider(
             @Value("${jwt.secret}") String secret,
             @Value("${jwt.access-token-expiration-ms}") long accessTokenValidityMs,
-            @Value("${jwt.refresh-token-expiration-ms}") long refreshTokenValidityMs
-    ) {
+            @Value("${jwt.refresh-token-expiration-ms}") long refreshTokenValidityMs) {
         this.key = Keys.hmacShaKeyFor(secret.getBytes());
         this.accessTokenValidityMs = accessTokenValidityMs;
         this.refreshTokenValidityMs = refreshTokenValidityMs;
@@ -55,5 +54,13 @@ public class JwtTokenProvider {
                 .verifyWith(key)
                 .build()
                 .parseSignedClaims(token);
+    }
+
+    public long getAccessTokenValidityMs() {
+        return accessTokenValidityMs;
+    }
+
+    public long getRefreshTokenValidityMs() {
+        return refreshTokenValidityMs;
     }
 }
