@@ -78,6 +78,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     if (optionalUser.isPresent()) {
                         User user = optionalUser.get();
 
+                        // 탈퇴한 회원 인증 차단
+                        if (user.getIsActive() != null && !user.getIsActive()) {
+                            SecurityContextHolder.clearContext();
+                            sendErrorResponse(response, HttpServletResponse.SC_FORBIDDEN,
+                                    "ACCOUNT_DEACTIVATED", "This account has been deactivated.");
+                            return;
+                        }
+
                         // DB에 role: "USER" / "ADMIN" 이런 식으로 있다고 가정
                         String role = user.getRole();
                         String roleName = role != null ? "ROLE_" + role : "ROLE_USER";

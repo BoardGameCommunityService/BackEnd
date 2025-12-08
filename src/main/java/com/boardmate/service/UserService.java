@@ -36,6 +36,10 @@ public class UserService {
         User user;
         if (alreadyRegistered) {
             user = optionalUser.get();
+            // 탈퇴한 회원 로그인 차단
+            if (user.getIsActive() != null && !user.getIsActive()) {
+                throw new IllegalArgumentException("This account has been deactivated");
+            }
         } else {
             user = User.builder()
                     .email(req.getEmail())
@@ -174,5 +178,14 @@ public class UserService {
         userRepository.save(user);
 
         return UserInfoResponse.from(user);
+    }
+
+    @Transactional
+    public void deactivateUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.deactivate();
+        userRepository.save(user);
     }
 }

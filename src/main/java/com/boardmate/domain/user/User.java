@@ -133,4 +133,10 @@ public class User {
         }
         this.updatedAt = LocalDateTime.now();
     }
+
+    public void deactivate() {
+        this.isActive = false;
+        this.refreshToken = null;
+        this.updatedAt = LocalDateTime.now();
+    }
 }
