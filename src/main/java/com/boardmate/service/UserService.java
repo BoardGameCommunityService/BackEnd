@@ -51,7 +51,7 @@ public class UserService {
 
         String accessToken = jwtTokenProvider.createAccessToken(user.getId(), user.getRole());
         String refreshToken = jwtTokenProvider.createRefreshToken(user.getId());
-        long expiresAt = System.currentTimeMillis() + 1000L * 60 * 60; // 1시간
+        long expiresAt = System.currentTimeMillis() + jwtTokenProvider.getAccessTokenValidityMs();
 
         // 리프레시 토큰 DB에 저장
         user.updateRefreshToken(refreshToken);
@@ -149,7 +149,7 @@ public class UserService {
         // 3) 새 액세스 토큰 및 새 리프레시 토큰 발급 (rotation)
         String newAccessToken = jwtTokenProvider.createAccessToken(user.getId(), user.getRole());
         String newRefreshToken = jwtTokenProvider.createRefreshToken(user.getId());
-        long expiresAt = System.currentTimeMillis() + 1000L * 60 * 60; // 1시간
+        long expiresAt = System.currentTimeMillis() + jwtTokenProvider.getAccessTokenValidityMs();
 
         // 4) 새 리프레시 토큰 DB에 저장
         user.updateRefreshToken(newRefreshToken);
