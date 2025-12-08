@@ -12,17 +12,13 @@ public class CreateMeetingRequest {
 
     private String title;
     private String content;
-    private String ruleLevel;
 
-    private String regionCode;
+    // multiple selectable game names
+    private List<String> gameNames;
+
     private String meetingPlace;
     private LocalDateTime meetingAt;
 
+    // null means unlimited
     private Integer maxParticipants;
-    private Integer currentParticipants;
-    private Integer feeEstimate;
-
-    private Long gameId;
-
-    private List<String> tags;  // → JSON 문자열로 저장됨
 }

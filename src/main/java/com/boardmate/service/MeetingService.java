@@ -1,12 +1,10 @@
 package com.boardmate.service;
 
-import com.boardmate.domain.game.Game;
 import com.boardmate.domain.meeting.Meeting;
 import com.boardmate.domain.user.User;
 import com.boardmate.dto.meeting.CreateMeetingRequest;
 import com.boardmate.dto.meeting.HostSummary;
 import com.boardmate.dto.meeting.MeetingDetailResponse;
-import com.boardmate.repository.GameRepository;
 import com.boardmate.repository.MeetingParticipantRepository;
 import com.boardmate.repository.MeetingRepository;
 import com.boardmate.repository.UserRepository;
@@ -27,7 +25,6 @@ public class MeetingService {
 
     private final MeetingRepository meetingRepository;
     private final UserRepository userRepository;
-    private final GameRepository gameRepository;
     private final MeetingParticipantRepository participantRepository;
 
     @Transactional(readOnly = true)
@@ -52,27 +49,16 @@ public class MeetingService {
 
         User host = userRepository.findById(hostId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-
-        Game game = null;
-        if (req.getGameId() != null) {
-            game = gameRepository.findById(req.getGameId())
-                    .orElse(null);
-        }
-
-        String tagsJson = convertToJson(req.getTags());
+        String gameNamesJson = convertToJson(req.getGameNames());
 
         Meeting meeting = Meeting.builder()
                 .host(host)
-                .game(game)
                 .title(req.getTitle())
                 .content(req.getContent())
-                .ruleLevel(req.getRuleLevel())
-                .regionCode(req.getRegionCode())
+                .gameNamesJson(gameNamesJson)
                 .meetingPlace(req.getMeetingPlace())
                 .meetingAt(req.getMeetingAt())
                 .maxParticipants(req.getMaxParticipants())
-                .feeEstimate(req.getFeeEstimate())
-                .tagsJson(tagsJson)
                 .status("OPEN")
                 .likeCount(0)
                 .commentCount(0)
@@ -85,11 +71,11 @@ public class MeetingService {
         return meeting.getId();
     }
 
-    private String convertToJson(List<String> tags) {
-        if (tags == null)
+    private String convertToJson(List<?> values) {
+        if (values == null)
             return "[]";
         try {
-            return new ObjectMapper().writeValueAsString(tags);
+            return new ObjectMapper().writeValueAsString(values);
         } catch (Exception e) {
             return "[]";
         }
@@ -114,15 +100,12 @@ public class MeetingService {
                 .meetingId(meeting.getId())
                 .title(meeting.getTitle())
                 .content(meeting.getContent())
-                .ruleLevel(meeting.getRuleLevel())
-                .regionCode(meeting.getRegionCode())
                 .meetingPlace(meeting.getMeetingPlace())
                 .meetingAt(meeting.getMeetingAt())
                 .maxParticipants(meeting.getMaxParticipants())
                 .currentParticipants(current)
-                .feeEstimate(meeting.getFeeEstimate())
                 .status(meeting.getStatus())
-                .tagsJson(meeting.getTagsJson())
+                .gameNamesJson(meeting.getGameNamesJson())
                 .host(hostSummary)
                 .build();
     }

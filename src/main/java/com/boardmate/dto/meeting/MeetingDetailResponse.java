@@ -13,19 +13,15 @@ public class MeetingDetailResponse {
 
     private String title;
     private String content;
-    private String ruleLevel;
-
-    private String regionCode;
     private String meetingPlace;
     private LocalDateTime meetingAt;
 
-    private Integer maxParticipants;
+    private Integer maxParticipants; // null = unlimited
     private Integer currentParticipants;
-    private Integer feeEstimate;
 
     private String status;
 
-    private String tagsJson;
+    private String gameNamesJson;
 
     private HostSummary host;
 }
