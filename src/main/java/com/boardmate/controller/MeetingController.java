@@ -43,7 +43,7 @@ public class MeetingController {
     @ApiResponse(responseCode = "200", description = "검색 성공")
     @GetMapping("/search")
     public ResponseEntity<?> search(
-            @Parameter(description = "검색 키워드", example = "보드게임") @RequestParam String keyword) {
+            @Parameter(description = "검색 키워드", example = "초심자") @RequestParam String keyword) {
         return ResponseEntity.ok(meetingService.searchMeetings(keyword));
     }
 

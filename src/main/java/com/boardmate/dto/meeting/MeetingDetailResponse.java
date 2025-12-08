@@ -25,5 +25,7 @@ public class MeetingDetailResponse {
 
     private String status;
 
+    private String tagsJson;
+
     private HostSummary host;
 }

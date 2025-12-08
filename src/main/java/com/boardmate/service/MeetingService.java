@@ -39,7 +39,7 @@ public class MeetingService {
         if (keyword == null || keyword.isBlank()) {
             return getMeetingList();
         }
-        return meetingRepository.findByTitleContainingIgnoreCaseOrContentContainingIgnoreCase(keyword, keyword)
+        return meetingRepository.findByKeyword(keyword)
                 .stream()
                 .map(meeting -> getDetail(meeting.getId()))
                 .toList();
@@ -120,6 +120,7 @@ public class MeetingService {
                 .currentParticipants(current)
                 .feeEstimate(meeting.getFeeEstimate())
                 .status(meeting.getStatus())
+                .tagsJson(meeting.getTagsJson())
                 .host(hostSummary)
                 .build();
     }
