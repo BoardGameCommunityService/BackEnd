@@ -109,7 +109,6 @@ public class MeetingService {
     /**
      * 모임 상세 조회 (내 신청 상태까지 포함)
      */
-
     // 로그인 유저 포함 상세 조회
     @Transactional(readOnly = true)
     public MeetingDetailResponse getDetail(Long meetingId, Long currentUserId) {

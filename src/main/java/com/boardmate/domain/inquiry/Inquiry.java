@@ -29,24 +29,24 @@ public class Inquiry {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    // 🔹 상태 : PENDING(답변 예정), ANSWERED(답변 완료)
+    // 상태 : PENDING(답변 예정), ANSWERED(답변 완료)
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private InquiryStatus status;
 
-    // 🔹 실제 답변 내용 (없으면 아직 미답변)
+    // 실제 답변 내용 (없으면 아직 미답변)
     @Column(columnDefinition = "TEXT")
     private String answerContent;
 
-    // 🔹 답변한 관리자
+    // 답변한 관리자
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "answered_by_admin_id")
     private User answeredBy;
 
-    // 🔹 답변 완료 시각
+    // 답변 완료 시각
     private LocalDateTime answeredAt;
 
-    // 🔹 문의 등록 시각 (문의 올린 날짜)
+    // 문의 등록 시각 (문의 올린 날짜)
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
