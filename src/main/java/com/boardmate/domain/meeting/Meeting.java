@@ -1,6 +1,5 @@
 package com.boardmate.domain.meeting;
 
-import com.boardmate.domain.game.Game;
 import com.boardmate.domain.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -26,10 +25,9 @@ public class Meeting {
     @JoinColumn(name = "host_id", nullable = false)
     private User host;
 
-    // 선택: 게임
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "game_id")
-    private Game game;
+    // 선택: 게임 이름 배열을 JSON 문자열로 저장
+    @Column(name = "game_ids_json", columnDefinition = "TEXT")
+    private String gameNamesJson;
 
     @Column(nullable = false, length = 120)
     private String title;
@@ -37,21 +35,11 @@ public class Meeting {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @Column(nullable = false)
-    private String ruleLevel; // ANY | BEGINNER
-
-    private String regionCode;
-
     private String meetingPlace;
 
     private LocalDateTime meetingAt;
 
     private Integer maxParticipants;
-
-    private Integer feeEstimate;
-
-    @Column(columnDefinition = "TEXT")
-    private String tagsJson;
 
     @Column(nullable = false)
     private String status; // OPEN | CLOSED

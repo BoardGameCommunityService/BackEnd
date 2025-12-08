@@ -12,6 +12,6 @@ public interface MeetingRepository extends JpaRepository<Meeting, Long> {
     @Query("SELECT m FROM Meeting m WHERE " +
             "LOWER(m.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
             "LOWER(m.content) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-            "LOWER(m.tagsJson) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+            "LOWER(m.meetingPlace) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<Meeting> findByKeyword(@Param("keyword") String keyword, Pageable pageable);
 }
