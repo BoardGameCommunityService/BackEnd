@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -52,6 +53,36 @@ public class MeetingParticipantController {
                     code = "MEETING_FULL";
                 } else if (message.contains("사용자를 찾을 수 없습니다")) {
                     code = "USER_NOT_FOUND";
+                }
+            }
+
+            Map<String, String> error = new HashMap<>();
+            error.put("code", code);
+            error.put("message", message);
+            return ResponseEntity.status(400).body(error);
+        }
+    }
+
+    @Operation(summary = "모집 참가 신청 취소", description = "신청한 모집 참가를 취소합니다. JWT 인증이 필요합니다.")
+    @ApiResponse(responseCode = "200", description = "취소 성공")
+    @DeleteMapping
+    public ResponseEntity<?> cancel(
+            @Parameter(hidden = true) @AuthenticationPrincipal User user,
+            @Parameter(description = "모집 ID", example = "1") @PathVariable Long meetingId) {
+        try {
+            MeetingParticipantsResponse response = participantService.cancel(meetingId, user.getId());
+            Map<String, Object> result = new HashMap<>();
+            result.put("data", response);
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            String code = "UNKNOWN_ERROR";
+            String message = e.getMessage();
+
+            if (message != null) {
+                if (message.contains("모임을 찾을 수 없습니다")) {
+                    code = "MEETING_NOT_FOUND";
+                } else if (message.contains("신청 기록을 찾을 수 없습니다")) {
+                    code = "PARTICIPATION_NOT_FOUND";
                 }
             }
 
