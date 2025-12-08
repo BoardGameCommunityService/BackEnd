@@ -81,4 +81,37 @@ public class MeetingController {
             @Parameter(description = "모집 ID", example = "1") @PathVariable Long id) {
         return ResponseEntity.ok(meetingService.getDetail(id));
     }
+
+    @Operation(summary = "모집 수정", description = "생성된 모집을 수정합니다. JWT 인증이 필요하며, 호스트만 수정 가능합니다.")
+    @ApiResponse(responseCode = "200", description = "수정 성공")
+    @PutMapping("/{id}")
+    public ResponseEntity<?> update(
+            @Parameter(hidden = true) @AuthenticationPrincipal User user,
+            @Parameter(description = "모집 ID", example = "1") @PathVariable Long id,
+            @RequestBody CreateMeetingRequest req) {
+        try {
+            meetingService.updateMeeting(id, user.getId(), req);
+            return ResponseEntity.ok(Map.of("message", "수정 완료"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(400).body(Map.of(
+                    "code", "UPDATE_FAILED",
+                    "message", e.getMessage()));
+        }
+    }
+
+    @Operation(summary = "모집 삭제", description = "모집을 삭제합니다. JWT 인증이 필요하며, 호스트만 삭제 가능합니다.")
+    @ApiResponse(responseCode = "200", description = "삭제 성공")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(
+            @Parameter(hidden = true) @AuthenticationPrincipal User user,
+            @Parameter(description = "모집 ID", example = "1") @PathVariable Long id) {
+        try {
+            meetingService.deleteMeeting(id, user.getId());
+            return ResponseEntity.ok(Map.of("message", "삭제 완료"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(400).body(Map.of(
+                    "code", "DELETE_FAILED",
+                    "message", e.getMessage()));
+        }
+    }
 }

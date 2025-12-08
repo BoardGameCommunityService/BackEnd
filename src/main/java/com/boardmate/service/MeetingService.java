@@ -179,6 +179,43 @@ public class MeetingService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    public void updateMeeting(Long meetingId, Long userId, CreateMeetingRequest req) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new RuntimeException("Meeting not found"));
+
+        // 호스트만 수정 가능
+        if (!meeting.getHost().getId().equals(userId)) {
+            throw new RuntimeException("호스트만 수정할 수 있습니다.");
+        }
+
+        String gameNamesJson = convertToJson(req.getGameNames());
+
+        meeting.setTitle(req.getTitle());
+        meeting.setContent(req.getContent());
+        meeting.setGameNamesJson(gameNamesJson);
+        meeting.setMeetingPlace(req.getMeetingPlace());
+        meeting.setMeetingAddress(req.getMeetingAddress());
+        meeting.setMeetingAt(req.getMeetingAt());
+        meeting.setMaxParticipants(req.getMaxParticipants());
+        meeting.setUpdatedAt(LocalDateTime.now());
+
+        meetingRepository.save(meeting);
+    }
+
+    @Transactional
+    public void deleteMeeting(Long meetingId, Long userId) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new RuntimeException("Meeting not found"));
+
+        // 호스트만 삭제 가능
+        if (!meeting.getHost().getId().equals(userId)) {
+            throw new RuntimeException("호스트만 삭제할 수 있습니다.");
+        }
+
+        meetingRepository.deleteById(meetingId);
+    }
+
     private List<String> parseGameNames(String gameNamesJson) {
         if (gameNamesJson == null || gameNamesJson.isBlank()) {
             return Collections.emptyList();
