@@ -52,6 +52,13 @@ public class MeetingService {
                 .map(meeting -> getDetail(meeting.getId()));
     }
 
+    @Transactional(readOnly = true)
+    public Page<MeetingDetailResponse> getHostMeetingList(Long hostId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return meetingRepository.findByHostId(hostId, pageable)
+                .map(meeting -> getDetail(meeting.getId()));
+    }
+
     @Transactional
     public Long createMeeting(Long hostId, CreateMeetingRequest req) {
 
