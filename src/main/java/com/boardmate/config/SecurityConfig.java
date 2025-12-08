@@ -28,7 +28,7 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    @Value("${cors.allowed-origin}")
+    @Value("${cors.allowed-origins:}")
     private String allowedOriginsProp;
 
     @Bean
@@ -68,10 +68,10 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // 단일 Origin만 허용 (환경변수/프로퍼티에서 하나만 지정)
+        // 쉼표로 구분된 여러 Origins 허용 (환경변수 필수)
         List<String> origins = (allowedOriginsProp == null || allowedOriginsProp.isBlank())
-                ? List.of("http://localhost:3000")
-                : List.of(allowedOriginsProp.trim());
+                ? List.of() // 기본값: 빈 리스트 (CORS 허용 안함)
+                : List.of(allowedOriginsProp.trim().split(","));
 
         config.setAllowedOrigins(origins);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
