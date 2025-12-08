@@ -5,6 +5,7 @@ import com.boardmate.domain.user.User;
 import com.boardmate.dto.meeting.CreateMeetingRequest;
 import com.boardmate.dto.meeting.HostSummary;
 import com.boardmate.dto.meeting.MeetingDetailResponse;
+import com.boardmate.dto.meeting.ParticipantSummary;
 import com.boardmate.repository.MeetingParticipantRepository;
 import com.boardmate.repository.MeetingRepository;
 import com.boardmate.repository.UserRepository;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -87,8 +89,23 @@ public class MeetingService {
         Meeting meeting = meetingRepository.findById(meetingId)
                 .orElseThrow(() -> new RuntimeException("Meeting not found"));
 
-        int current = participantRepository.countByMeetingIdAndStatus(
-                meetingId, "APPROVED");
+        int currentCount = participantRepository.countByMeetingId(meetingId);
+
+        List<ParticipantSummary> participants = participantRepository.findByMeetingId(meetingId)
+                .stream()
+                .map(p -> ParticipantSummary.builder()
+                        .userId(p.getUser().getId())
+                        .nickname(p.getUser().getNickname())
+                        .avatarImageUrl(p.getUser().getProfileImageUrl())
+                        .build())
+                .collect(Collectors.toList());
+
+        // include host in list and count
+        participants.add(0, ParticipantSummary.builder()
+                .userId(meeting.getHost().getId())
+                .nickname(meeting.getHost().getNickname())
+                .avatarImageUrl(meeting.getHost().getProfileImageUrl())
+                .build());
 
         HostSummary hostSummary = HostSummary.builder()
                 .userId(meeting.getHost().getId())
@@ -103,9 +120,10 @@ public class MeetingService {
                 .meetingPlace(meeting.getMeetingPlace())
                 .meetingAt(meeting.getMeetingAt())
                 .maxParticipants(meeting.getMaxParticipants())
-                .currentParticipants(current)
+                .currentParticipants(currentCount + 1)
                 .status(meeting.getStatus())
                 .gameNamesJson(meeting.getGameNamesJson())
+                .participants(participants)
                 .host(hostSummary)
                 .build();
     }

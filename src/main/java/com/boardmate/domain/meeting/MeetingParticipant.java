@@ -7,18 +7,14 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(
-        name = "meeting_participants",
-        uniqueConstraints = {
-                @UniqueConstraint(
-                        name = "uk_meeting_user",
-                        columnNames = { "meeting_id", "user_id" }
-                )
-        }
-)
-@Getter  @Setter
+@Table(name = "meeting_participants", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_meeting_user", columnNames = { "meeting_id", "user_id" })
+})
+@Getter
+@Setter
 @Builder
-@NoArgsConstructor  @AllArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 @IdClass(MeetingParticipantId.class)
 public class MeetingParticipant {
 
@@ -31,9 +27,6 @@ public class MeetingParticipant {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
-
-    @Column(nullable = false)
-    private String status; // REQUESTED | APPROVED | ...
 
     private String note;
 
