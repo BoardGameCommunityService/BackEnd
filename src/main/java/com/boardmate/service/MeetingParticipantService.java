@@ -61,6 +61,19 @@ public class MeetingParticipantService {
         return buildParticipantsResponse(meetingId, meeting);
     }
 
+    @Transactional
+    public MeetingParticipantsResponse cancel(Long meetingId, Long userId) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new RuntimeException("모임을 찾을 수 없습니다."));
+
+        MeetingParticipant participant = participantRepository.findByMeetingIdAndUserId(meetingId, userId)
+                .orElseThrow(() -> new RuntimeException("신청 기록을 찾을 수 없습니다."));
+
+        participantRepository.delete(participant);
+
+        return buildParticipantsResponse(meetingId, meeting);
+    }
+
     private MeetingParticipantsResponse buildParticipantsResponse(Long meetingId, Meeting meeting) {
         int currentCount = participantRepository.countByMeetingId(meetingId);
 
