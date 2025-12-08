@@ -1,6 +1,7 @@
 package com.boardmate.controller;
 
 import com.boardmate.domain.user.User;
+import com.boardmate.dto.meeting.MeetingParticipantsResponse;
 import com.boardmate.service.MeetingParticipantService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Tag(name = "모집참가", description = "보드게임 모집 참가 신청 관련 API")
@@ -30,7 +32,33 @@ public class MeetingParticipantController {
     public ResponseEntity<?> apply(
             @Parameter(hidden = true) @AuthenticationPrincipal User user,
             @Parameter(description = "모집 ID", example = "1") @PathVariable Long meetingId) {
-        participantService.apply(meetingId, user.getId());
-        return ResponseEntity.ok(Map.of("message", "신청 완료"));
+        try {
+            MeetingParticipantsResponse response = participantService.apply(meetingId, user.getId());
+            Map<String, Object> result = new HashMap<>();
+            result.put("data", response);
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            String code = "UNKNOWN_ERROR";
+            String message = e.getMessage();
+
+            if (message != null) {
+                if (message.contains("모임을 찾을 수 없습니다")) {
+                    code = "MEETING_NOT_FOUND";
+                } else if (message.contains("호스트는 참가 신청할 수 없습니다")) {
+                    code = "HOST_CANNOT_APPLY";
+                } else if (message.contains("이미 신청했습니다")) {
+                    code = "ALREADY_APPLIED";
+                } else if (message.contains("정원이 가득 찼습니다")) {
+                    code = "MEETING_FULL";
+                } else if (message.contains("사용자를 찾을 수 없습니다")) {
+                    code = "USER_NOT_FOUND";
+                }
+            }
+
+            Map<String, String> error = new HashMap<>();
+            error.put("code", code);
+            error.put("message", message);
+            return ResponseEntity.status(400).body(error);
+        }
     }
 }
