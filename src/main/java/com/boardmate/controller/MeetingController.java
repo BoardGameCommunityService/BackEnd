@@ -13,6 +13,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.List;
 
 @Tag(name = "모집", description = "보드게임 모집 관련 API")
 @RestController
@@ -49,6 +50,28 @@ public class MeetingController {
             @Parameter(description = "페이지 번호 (0부터 시작)", example = "0") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "페이지 크기", example = "5") @RequestParam(defaultValue = "5") int size) {
         return ResponseEntity.ok(meetingService.searchMeetings(keyword, page, size));
+    }
+
+    @Operation(summary = "인기 게임 목록", description = "모임 등록 기준으로 인기 게임을 집계해 내림차순으로 반환합니다.")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/popular/games")
+    public ResponseEntity<?> popularGames(
+            @Parameter(description = "최대 반환 개수", example = "10") @RequestParam(defaultValue = "10") int limit) {
+        List<?> items = meetingService.getPopularGames(limit);
+        return ResponseEntity.ok(items);
+    }
+
+    @Operation(summary = "인기 지역 목록", description = "모임 등록 기준으로 인기 지역을 집계해 내림차순으로 반환합니다."
+            + "<br><br>"
+            + "모임 생성 시 추가하는 meetingPlace 기준으로 집계합니다."
+            + "<br><br>"
+            + "지역별 코드 혹은 문자열이 필수로 지정되어야 합니다.")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/popular/regions")
+    public ResponseEntity<?> popularRegions(
+            @Parameter(description = "최대 반환 개수", example = "10") @RequestParam(defaultValue = "10") int limit) {
+        List<?> items = meetingService.getPopularRegions(limit);
+        return ResponseEntity.ok(items);
     }
 
     @Operation(summary = "모집 상세 조회", description = "모집 ID로 상세 정보를 조회합니다.")
