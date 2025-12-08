@@ -46,22 +46,32 @@ public class AuthController {
             + "<br>• 프론트엔드(브라우저)는 HttpOnly 쿠키로 자동 관리"
             + "<br>• /api/auth/complete-signup: 추가 정보 입력 후 회원가입 완료")
     @ApiResponse(responseCode = "200", description = "동기화 성공")
+    @ApiResponse(responseCode = "403", description = "탈퇴한 계정")
     @PostMapping("/sync-from-nextauth")
     public ResponseEntity<SocialLoginResponse> syncFromNextAuth(
             @RequestBody SocialLoginRequest request,
             HttpServletResponse response) {
-        SocialLoginResponse loginResponse = userService.syncUserFromNextAuth(request);
+        try {
+            SocialLoginResponse loginResponse = userService.syncUserFromNextAuth(request);
 
-        // Refresh Token을 HttpOnly 쿠키로 설정
-        if (loginResponse.getRefreshToken() != null) {
-            Cookie refreshTokenCookie = createRefreshTokenCookie(loginResponse.getRefreshToken());
-            response.addCookie(refreshTokenCookie);
+            // Refresh Token을 HttpOnly 쿠키로 설정
+            if (loginResponse.getRefreshToken() != null) {
+                Cookie refreshTokenCookie = createRefreshTokenCookie(loginResponse.getRefreshToken());
+                response.addCookie(refreshTokenCookie);
 
-            // 응답 Body에서는 refreshToken 제거 (보안상 쿠키로만 전달)
-            loginResponse.setRefreshToken(null);
+                // 응답 Body에서는 refreshToken 제거 (보안상 쿠키로만 전달)
+                loginResponse.setRefreshToken(null);
+            }
+
+            return ResponseEntity.ok(loginResponse);
+        } catch (IllegalArgumentException e) {
+            // 탈퇴한 계정 로그인 시도
+            if (e.getMessage().contains("deactivated")) {
+                return ResponseEntity.status(403)
+                        .body(SocialLoginResponse.error("ACCOUNT_DEACTIVATED", "This account has been deactivated"));
+            }
+            throw e;
         }
-
-        return ResponseEntity.ok(loginResponse);
     }
 
     @Operation(summary = "회원가입 완료", description = "소셜 로그인 후 추가 정보를 입력하여 회원가입을 완료합니다."
@@ -175,6 +185,41 @@ public class AuthController {
         cookie.setAttribute("SameSite", "Strict");
 
         response.addCookie(cookie);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "회원탈퇴", description = "사용자 계정을 비활성화합니다 (데이터는 보관됨)."
+            + "<br><br>"
+            + "<b>[ 동작 ]</b>"
+            + "<br>• isActive = false 로 변경 (soft delete)"
+            + "<br>• refreshToken 삭제"
+            + "<br>• 로그인 불가 상태로 전환"
+            + "<br><br>"
+            + "<b>[ 참고 ]</b>"
+            + "<br>• 데이터는 DB에 보관됨 (완전 삭제 안됨)"
+            + "<br>• 탈퇴 후 로그인 불가"
+            + "<br>• 동일 이메일로 재가입 불가")
+    @ApiResponse(responseCode = "200", description = "회원탈퇴 성공")
+    @ApiResponse(responseCode = "401", description = "인증 필요")
+    @PostMapping("/deactivate")
+    public ResponseEntity<Void> deactivateUser(
+            @Parameter(hidden = true) @AuthenticationPrincipal User user,
+            HttpServletResponse response) {
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        userService.deactivateUser(user.getId());
+
+        // 쿠키 삭제 (MaxAge=0)
+        Cookie cookie = new Cookie(REFRESH_TOKEN_COOKIE_NAME, null);
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setAttribute("SameSite", "Strict");
+        response.addCookie(cookie);
+
         return ResponseEntity.ok().build();
     }
 
