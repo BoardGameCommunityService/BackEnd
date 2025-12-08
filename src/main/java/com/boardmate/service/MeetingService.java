@@ -12,6 +12,9 @@ import com.boardmate.repository.MeetingRepository;
 import com.boardmate.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,21 +31,20 @@ public class MeetingService {
     private final MeetingParticipantRepository participantRepository;
 
     @Transactional(readOnly = true)
-    public List<MeetingDetailResponse> getMeetingList() {
-        return meetingRepository.findAll().stream()
-                .map(meeting -> getDetail(meeting.getId()))
-                .toList();
+    public Page<MeetingDetailResponse> getMeetingList(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return meetingRepository.findAll(pageable)
+                .map(meeting -> getDetail(meeting.getId()));
     }
 
     @Transactional(readOnly = true)
-    public List<MeetingDetailResponse> searchMeetings(String keyword) {
+    public Page<MeetingDetailResponse> searchMeetings(String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
         if (keyword == null || keyword.isBlank()) {
-            return getMeetingList();
+            return getMeetingList(page, size);
         }
-        return meetingRepository.findByKeyword(keyword)
-                .stream()
-                .map(meeting -> getDetail(meeting.getId()))
-                .toList();
+        return meetingRepository.findByKeyword(keyword, pageable)
+                .map(meeting -> getDetail(meeting.getId()));
     }
 
     @Transactional
