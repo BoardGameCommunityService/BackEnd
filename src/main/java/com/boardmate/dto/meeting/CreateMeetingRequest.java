@@ -17,6 +17,7 @@ public class CreateMeetingRequest {
     private List<String> gameNames;
 
     private String meetingPlace;
+    private String meetingAddress;
     private LocalDateTime meetingAt;
 
     // null means unlimited

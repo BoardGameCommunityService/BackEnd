@@ -36,6 +36,7 @@ public class Meeting {
     private String content;
 
     private String meetingPlace;
+    private String meetingAddress;
 
     private LocalDateTime meetingAt;
 
