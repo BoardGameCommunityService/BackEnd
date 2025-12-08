@@ -29,7 +29,7 @@ springdoc:
     doc-expansion: none
 
 cors:
-  allowed-origin: ${CORS_ALLOWED_ORIGIN}
+  allowed-origins: ${CORS_ALLOWED_ORIGINS}
 
 logging:
   level:
