@@ -94,7 +94,7 @@ public class UserService {
         if (req.getConsent() != null) {
             CompleteSignupRequest.Consent c = req.getConsent();
             // 서버 시간으로 동의 시각 저장
-            user.updateConsent(c.getService(), c.getPrivacy(), c.getLocation());
+            user.updateConsent(c.getService(), c.getPrivacy());
         }
 
         // 리프레시 토큰 생성 및 DB 저장

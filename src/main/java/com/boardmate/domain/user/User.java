@@ -44,10 +44,9 @@ public class User {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    // 약관 동의 (필수: service, privacy / 선택: location)
+    // 약관 동의 (필수: service, privacy)
     private Boolean consentService;
     private Boolean consentPrivacy;
-    private Boolean consentLocation;
     private LocalDateTime consentAgreedAt;
 
     // 토큰 재발급용 리프레시 토큰 저장
@@ -94,10 +93,9 @@ public class User {
         this.region = region;
     }
 
-    public void updateConsent(Boolean service, Boolean privacy, Boolean location) {
+    public void updateConsent(Boolean service, Boolean privacy) {
         this.consentService = service;
         this.consentPrivacy = privacy;
-        this.consentLocation = location;
         this.consentAgreedAt = LocalDateTime.now();
     }
 
