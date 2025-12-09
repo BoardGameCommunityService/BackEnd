@@ -9,4 +9,5 @@ public class ParticipantSummary {
     private Long userId;
     private String nickname;
     private String avatarImageUrl;
+    private String status; // PENDING | APPROVED | DENIED
 }

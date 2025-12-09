@@ -28,6 +28,9 @@ public class MeetingParticipant {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Column(nullable = false)
+    private String status; // PENDING | APPROVED | DENIED
+
     private String note;
 
     private LocalDateTime joinedAt;
