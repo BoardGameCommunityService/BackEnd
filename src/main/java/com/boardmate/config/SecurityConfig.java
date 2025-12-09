@@ -48,6 +48,9 @@ public class SecurityConfig {
                                 "/mongo-check",
                                 "/api/meetings", // 게시글 목록 조회 (인증 불필요)
                                 "/api/meetings/search", // 게시글 목록 조회 (인증 불필요)
+                                "/api/meetings/popular/regions", // 인기 게시글 지역별 조회 (인증 불필요)
+                                "/api/meetings/popular/games", // 인기 게시글 게임별 조회 (인증 불필요)
+
                                 // Swagger UI
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
