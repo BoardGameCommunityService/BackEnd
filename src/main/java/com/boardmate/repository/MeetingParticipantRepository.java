@@ -14,4 +14,8 @@ public interface MeetingParticipantRepository extends JpaRepository<MeetingParti
     int countByMeetingId(Long meetingId);
 
     List<MeetingParticipant> findByMeetingId(Long meetingId);
+
+    List<MeetingParticipant> findByUserIdAndStatus(Long userId, String status);
+
+    long countByUserIdAndStatus(Long userId, String status);
 }
