@@ -73,6 +73,7 @@ public class MeetingService {
                 .gameNamesJson(gameNamesJson)
                 .meetingPlace(req.getMeetingPlace())
                 .meetingAddress(req.getMeetingAddress())
+                .regionCode(req.getRegionCode())
                 .meetingAt(req.getMeetingAt())
                 .maxParticipants(req.getMaxParticipants())
                 .status("OPEN")
@@ -133,6 +134,7 @@ public class MeetingService {
                 .content(meeting.getContent())
                 .meetingPlace(meeting.getMeetingPlace())
                 .meetingAddress(meeting.getMeetingAddress())
+                .regionCode(meeting.getRegionCode())
                 .meetingAt(meeting.getMeetingAt())
                 .maxParticipants(meeting.getMaxParticipants())
                 .currentParticipants(currentCount + 1)
@@ -203,6 +205,7 @@ public class MeetingService {
         meeting.setGameNamesJson(gameNamesJson);
         meeting.setMeetingPlace(req.getMeetingPlace());
         meeting.setMeetingAddress(req.getMeetingAddress());
+        meeting.setRegionCode(req.getRegionCode());
         meeting.setMeetingAt(req.getMeetingAt());
         meeting.setMaxParticipants(req.getMaxParticipants());
         meeting.setUpdatedAt(LocalDateTime.now());

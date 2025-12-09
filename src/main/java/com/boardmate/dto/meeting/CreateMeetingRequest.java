@@ -18,6 +18,7 @@ public class CreateMeetingRequest {
 
     private String meetingPlace;
     private String meetingAddress;
+    private String regionCode;
     private LocalDateTime meetingAt;
 
     // null means unlimited
