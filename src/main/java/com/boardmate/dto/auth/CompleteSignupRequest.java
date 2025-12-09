@@ -13,6 +13,5 @@ public class CompleteSignupRequest {
     public static class Consent {
         private Boolean service; // 서비스 이용약관 (필수)
         private Boolean privacy; // 개인정보 처리방침 (필수)
-        private Boolean location; // 위치기반 서비스 (선택)
     }
 }
