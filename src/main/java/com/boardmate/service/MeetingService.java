@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,17 +37,40 @@ public class MeetingService {
     private final MeetingParticipantRepository participantRepository;
 
     @Transactional(readOnly = true)
-    public Page<MeetingDetailResponse> getMeetingList(int page, int size) {
+    public Page<MeetingDetailResponse> getMeetingList(int page, int size, String date) {
         Pageable pageable = PageRequest.of(page, size);
-        return meetingRepository.findAll(pageable)
-                .map(meeting -> getDetail(meeting.getId()));
+
+        if (date == null || date.isBlank()) {
+            return meetingRepository.findAll(pageable)
+                    .map(meeting -> getDetail(meeting.getId()));
+        }
+
+        // Parse YYYYMMDD format to LocalDate
+        if (date.length() != 8 || !date.matches("\\d{8}")) {
+            throw new RuntimeException("Invalid date format. Use YYYYMMDD");
+        }
+
+        try {
+            int year = Integer.parseInt(date.substring(0, 4));
+            int month = Integer.parseInt(date.substring(4, 6));
+            int day = Integer.parseInt(date.substring(6, 8));
+
+            LocalDate targetDate = LocalDate.of(year, month, day);
+            LocalDateTime startOfDay = targetDate.atStartOfDay();
+            LocalDateTime endOfDay = targetDate.atTime(23, 59, 59);
+
+            return meetingRepository.findByMeetingAtBetween(startOfDay, endOfDay, pageable)
+                    .map(meeting -> getDetail(meeting.getId()));
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid date format or value. Use YYYYMMDD");
+        }
     }
 
     @Transactional(readOnly = true)
     public Page<MeetingDetailResponse> searchMeetings(String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         if (keyword == null || keyword.isBlank()) {
-            return getMeetingList(page, size);
+            return getMeetingList(page, size, null);
         }
         return meetingRepository.findByKeyword(keyword, pageable)
                 .map(meeting -> getDetail(meeting.getId()));
