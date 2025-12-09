@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
+
 public interface MeetingRepository extends JpaRepository<Meeting, Long> {
 
     @Query("SELECT m FROM Meeting m WHERE " +
@@ -16,4 +18,6 @@ public interface MeetingRepository extends JpaRepository<Meeting, Long> {
     Page<Meeting> findByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
     Page<Meeting> findByHostId(Long hostId, Pageable pageable);
+
+    Page<Meeting> findByMeetingAtBetween(LocalDateTime startOfDay, LocalDateTime endOfDay, Pageable pageable);
 }

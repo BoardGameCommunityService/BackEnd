@@ -33,13 +33,14 @@ public class MeetingController {
         return ResponseEntity.ok(Map.of("meetingId", id));
     }
 
-    @Operation(summary = "모집 목록 조회", description = "모든 보드게임 모집 목록을 조회합니다. 인증 불필요. 페이징 지원.")
+    @Operation(summary = "모집 목록 조회", description = "모든 보드게임 모집 목록을 조회합니다. 인증 불필요. 페이징 지원. 날짜로 필터링 가능 (YYYYMMDD 형식).")
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping
     public ResponseEntity<?> list(
             @Parameter(description = "페이지 번호 (0부터 시작)", example = "0") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "페이지 크기", example = "5") @RequestParam(defaultValue = "5") int size) {
-        return ResponseEntity.ok(meetingService.getMeetingList(page, size));
+            @Parameter(description = "페이지 크기", example = "5") @RequestParam(defaultValue = "5") int size,
+            @Parameter(description = "조회 날짜 (YYYYMMDD 형식, 선택사항, null be possible)", example = "20251210") @RequestParam(required = false) String date) {
+        return ResponseEntity.ok(meetingService.getMeetingList(page, size, date));
     }
 
     @Operation(summary = "모집 검색", description = "제목, 내용, 태그로 보드게임 모집을 검색합니다. 인증 불필요. 페이징 지원.")
