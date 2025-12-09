@@ -16,6 +16,7 @@ public class MeetingDetailResponse {
     private String content;
     private String meetingPlace;
     private String meetingAddress;
+    private String regionCode;
     private LocalDateTime meetingAt;
 
     private Integer maxParticipants; // null = unlimited
