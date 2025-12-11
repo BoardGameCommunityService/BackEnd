@@ -22,4 +22,9 @@ public interface MeetingRepository extends JpaRepository<Meeting, Long> {
     long countByHostId(Long hostId);
 
     Page<Meeting> findByMeetingAtBetween(LocalDateTime startOfDay, LocalDateTime endOfDay, Pageable pageable);
+
+    Page<Meeting> findByRegionCode(String regionCode, Pageable pageable);
+
+    Page<Meeting> findByRegionCodeAndMeetingAtBetween(String regionCode, LocalDateTime startOfDay,
+            LocalDateTime endOfDay, Pageable pageable);
 }
