@@ -37,15 +37,25 @@ public class MeetingService {
     private final MeetingParticipantRepository participantRepository;
 
     @Transactional(readOnly = true)
-    public Page<MeetingDetailResponse> getMeetingList(int page, int size, String date) {
+    public Page<MeetingDetailResponse> getMeetingList(int page, int size, String date, String regionCode) {
         Pageable pageable = PageRequest.of(page, size);
 
-        if (date == null || date.isBlank()) {
+        boolean hasDate = date != null && !date.isBlank();
+        boolean hasRegionCode = regionCode != null && !regionCode.isBlank();
+
+        // 날짜도 없고 지역코드도 없으면 전체 조회
+        if (!hasDate && !hasRegionCode) {
             return meetingRepository.findAll(pageable)
                     .map(meeting -> getDetail(meeting.getId()));
         }
 
-        // Parse YYYYMMDD format to LocalDate
+        // 지역코드만 있는 경우
+        if (!hasDate && hasRegionCode) {
+            return meetingRepository.findByRegionCode(regionCode, pageable)
+                    .map(meeting -> getDetail(meeting.getId()));
+        }
+
+        // 날짜 파싱
         if (date.length() != 8 || !date.matches("\\d{8}")) {
             throw new RuntimeException("Invalid date format. Use YYYYMMDD");
         }
@@ -59,7 +69,14 @@ public class MeetingService {
             LocalDateTime startOfDay = targetDate.atStartOfDay();
             LocalDateTime endOfDay = targetDate.atTime(23, 59, 59);
 
-            return meetingRepository.findByMeetingAtBetween(startOfDay, endOfDay, pageable)
+            // 날짜만 있는 경우
+            if (!hasRegionCode) {
+                return meetingRepository.findByMeetingAtBetween(startOfDay, endOfDay, pageable)
+                        .map(meeting -> getDetail(meeting.getId()));
+            }
+
+            // 날짜와 지역코드 둘 다 있는 경우
+            return meetingRepository.findByRegionCodeAndMeetingAtBetween(regionCode, startOfDay, endOfDay, pageable)
                     .map(meeting -> getDetail(meeting.getId()));
         } catch (Exception e) {
             throw new RuntimeException("Invalid date format or value. Use YYYYMMDD");
@@ -70,7 +87,7 @@ public class MeetingService {
     public Page<MeetingDetailResponse> searchMeetings(String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         if (keyword == null || keyword.isBlank()) {
-            return getMeetingList(page, size, null);
+            return getMeetingList(page, size, null, null);
         }
         return meetingRepository.findByKeyword(keyword, pageable)
                 .map(meeting -> getDetail(meeting.getId()));
