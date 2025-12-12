@@ -30,6 +30,7 @@ public class MeetingParticipantService {
     private final MeetingParticipantRepository participantRepository;
     private final UserRepository userRepository;
     private final MeetingService meetingService;
+    private final NotificationService notificationService;
 
     @Transactional
     public MeetingParticipantsResponse apply(Long meetingId, Long userId) {
@@ -65,6 +66,13 @@ public class MeetingParticipantService {
                 .build();
 
         participantRepository.save(participant);
+
+        // 호스트에게 알림 전송
+        notificationService.notifyMeetingApplication(
+                meeting.getHost().getId(),
+                meetingId,
+                user.getNickname(),
+                meeting.getTitle());
 
         return buildParticipantsResponse(meetingId, meeting);
     }
@@ -125,6 +133,12 @@ public class MeetingParticipantService {
         participant.setUpdatedAt(LocalDateTime.now());
         participantRepository.save(participant);
 
+        // 신청자에게 수락 알림 전송
+        notificationService.notifyApplicationApproved(
+                participantUserId,
+                meetingId,
+                meeting.getTitle());
+
         return buildParticipantsResponse(meetingId, meeting);
     }
 
@@ -144,6 +158,12 @@ public class MeetingParticipantService {
         participant.setStatus("DENIED");
         participant.setUpdatedAt(LocalDateTime.now());
         participantRepository.save(participant);
+
+        // 신청자에게 반려 알림 전송
+        notificationService.notifyApplicationDenied(
+                participantUserId,
+                meetingId,
+                meeting.getTitle());
 
         return buildParticipantsResponse(meetingId, meeting);
     }

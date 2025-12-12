@@ -36,4 +36,15 @@ public class UserController {
             @RequestBody UpdateUserInfoRequest req) {
         return ResponseEntity.ok(userService.updateUserInfo(user.getId(), req));
     }
+
+    @Operation(summary = "내 정보 요약", description = "사용자의 프로필 정보, 모임 통계, 알림 여부를 한 번에 조회합니다. JWT 인증 필요.")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/me/summary")
+    public ResponseEntity<?> getMySummary(
+            @Parameter(hidden = true) @AuthenticationPrincipal User user) {
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
+        return ResponseEntity.ok(userService.getMySummary(user.getId()));
+    }
 }

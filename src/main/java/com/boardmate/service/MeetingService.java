@@ -126,6 +126,7 @@ public class MeetingService {
 
         meetingRepository.save(meeting);
 
+        // 지역 기반 모임 알림은 저장하지 않고 조회 시 동적으로 노출합니다.
         return meeting.getId();
     }
 
