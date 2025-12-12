@@ -52,6 +52,14 @@ public class InquiryController {
         return ResponseEntity.ok(inquiryService.getAllInquiries());
     }
 
+    @Operation(summary = "문의 단건 조회", description = "문의 ID로 단건 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/{inquiryId}")
+    public ResponseEntity<InquiryResponse> getInquiry(
+            @Parameter(description = "문의 ID", example = "1") @PathVariable Long inquiryId) {
+        return ResponseEntity.ok(inquiryService.getInquiry(inquiryId));
+    }
+
     @Operation(summary = "문의 답변 (관리자)", description = "문의에 답변을 등록합니다. ADMIN 권한이 필요합니다. ADMIN 권한 체크 로직 추가 필요 (회의 때 논의 필요)")
     @ApiResponse(responseCode = "200", description = "답변 등록 성공")
     @PostMapping("/{inquiryId}/answer")

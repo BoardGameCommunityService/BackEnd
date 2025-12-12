@@ -27,4 +27,7 @@ public interface MeetingRepository extends JpaRepository<Meeting, Long> {
 
     Page<Meeting> findByRegionCodeAndMeetingAtBetween(String regionCode, LocalDateTime startOfDay,
             LocalDateTime endOfDay, Pageable pageable);
+
+    // 동적 지역 알림용: 사용자의 지역코드와 현재시점 이후 모임 조회
+    java.util.List<Meeting> findByRegionCodeAndMeetingAtAfter(String regionCode, LocalDateTime now);
 }

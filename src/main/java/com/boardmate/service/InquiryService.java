@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 public class InquiryService {
 
     private final InquiryRepository inquiryRepository;
+    private final NotificationService notificationService;
 
     @Transactional
     public Long createInquiry(Long userId, CreateInquiryRequest request) {
@@ -43,12 +44,21 @@ public class InquiryService {
                 .collect(Collectors.toList());
     }
 
+    public InquiryResponse getInquiry(Long inquiryId) {
+        Inquiry inquiry = inquiryRepository.findById(inquiryId)
+                .orElseThrow(() -> new IllegalArgumentException("문의를 찾을 수 없습니다."));
+        return toResponse(inquiry);
+    }
+
     @Transactional
     public void answerInquiry(Long inquiryId, Long adminId, String answer) {
         Inquiry inquiry = inquiryRepository.findById(inquiryId)
                 .orElseThrow(() -> new IllegalArgumentException("문의를 찾을 수 없습니다."));
 
         inquiry.addAnswer(adminId, answer);
+
+        // 문의글 작성자에게 답변 알림을 영속화하여 저장
+        notificationService.notifyAnswer(inquiry.getUserId(), inquiry.getId(), inquiry.getTitle());
     }
 
     private InquiryResponse toResponse(Inquiry inquiry) {

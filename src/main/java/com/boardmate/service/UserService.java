@@ -6,6 +6,7 @@ import com.boardmate.dto.auth.CompleteSignupRequest;
 import com.boardmate.dto.auth.SocialLoginRequest;
 import com.boardmate.dto.auth.SocialLoginResponse;
 import com.boardmate.dto.auth.TokenRefreshResponse;
+import com.boardmate.dto.user.MySummary;
 import com.boardmate.dto.user.UpdateUserInfoRequest;
 import com.boardmate.dto.user.UserInfoResponse;
 import com.boardmate.repository.UserRepository;
@@ -22,6 +23,8 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
+    private final MeetingParticipantService meetingParticipantService;
+    private final NotificationService notificationService;
 
     /**
      * 기존에 있던 "백엔드에서 자체 JWT 발급" 소셜 로그인 로직
@@ -187,5 +190,31 @@ public class UserService {
 
         user.deactivate();
         userRepository.save(user);
+    }
+
+    @Transactional(readOnly = true)
+    public MySummary getMySummary(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // 모임 관련 정보
+        var participationSummary = meetingParticipantService.getMyParticipationSummary(userId);
+
+        // 알림 관련 정보
+        boolean hasNewNotifications = notificationService.hasUnreadNotifications(userId);
+        long unreadCount = notificationService.getUnreadNotificationCount(userId);
+
+        return MySummary.builder()
+                .userId(user.getId())
+                .email(user.getEmail())
+                .nickname(user.getNickname())
+                .profileImageUrl(user.getProfileImageUrl())
+                .region(user.getRegion())
+                .hostCount(participationSummary.getHostCount())
+                .approvedCount(participationSummary.getApprovedCount())
+                .pendingCount(participationSummary.getPendingCount())
+                .hasNewNotifications(hasNewNotifications)
+                .unreadNotificationCount(unreadCount)
+                .build();
     }
 }
