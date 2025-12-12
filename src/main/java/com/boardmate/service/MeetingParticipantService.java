@@ -3,8 +3,10 @@ package com.boardmate.service;
 import com.boardmate.domain.meeting.Meeting;
 import com.boardmate.domain.meeting.MeetingParticipant;
 import com.boardmate.domain.user.User;
+import com.boardmate.dto.meeting.ApprovedMeetingsResponse;
 import com.boardmate.dto.meeting.MeetingDetailResponse;
 import com.boardmate.dto.meeting.MeetingParticipantsResponse;
+import com.boardmate.dto.meeting.MeetingSummary;
 import com.boardmate.dto.meeting.MyParticipationSummary;
 import com.boardmate.dto.meeting.ParticipantSummary;
 import com.boardmate.repository.MeetingParticipantRepository;
@@ -177,5 +179,66 @@ public class MeetingParticipantService {
         long approvedCount = participantRepository.countByUserIdAndStatus(userId, "APPROVED");
         long pendingCount = participantRepository.countByUserIdAndStatus(userId, "PENDING");
         return new MyParticipationSummary(hostCount, approvedCount, pendingCount);
+    }
+
+    @Transactional(readOnly = true)
+    public ApprovedMeetingsResponse getApprovedMeetingsWithStatus(Long userId) {
+        List<MeetingParticipant> participants = participantRepository.findByUserIdAndStatus(userId, "APPROVED");
+        Set<Long> meetingIds = new HashSet<>();
+        List<MeetingSummary> allMeetings = new ArrayList<>();
+
+        LocalDateTime now = LocalDateTime.now();
+
+        for (MeetingParticipant participant : participants) {
+            Long meetingId = participant.getMeeting().getId();
+            // 중복 방지
+            if (meetingIds.add(meetingId)) {
+                MeetingDetailResponse detail = meetingService.getDetail(meetingId);
+                MeetingSummary summary = convertToMeetingSummary(detail);
+                allMeetings.add(summary);
+            }
+        }
+
+        // 시간 기준으로 upcoming/finished 분류
+        List<MeetingSummary> upcoming = new ArrayList<>();
+        List<MeetingSummary> finished = new ArrayList<>();
+
+        for (MeetingSummary meeting : allMeetings) {
+            if (meeting.getMeetingAt().isAfter(now)) {
+                upcoming.add(meeting);
+            } else {
+                finished.add(meeting);
+            }
+        }
+
+        // upcoming: meetingAt 오름차순 정렬
+        upcoming.sort((a, b) -> a.getMeetingAt().compareTo(b.getMeetingAt()));
+
+        // finished: meetingAt 내림차순 정렬
+        finished.sort((a, b) -> b.getMeetingAt().compareTo(a.getMeetingAt()));
+
+        return ApprovedMeetingsResponse.builder()
+                .upcoming(upcoming)
+                .finished(finished)
+                .totalUpcoming((long) upcoming.size())
+                .totalFinished((long) finished.size())
+                .build();
+    }
+
+    private MeetingSummary convertToMeetingSummary(MeetingDetailResponse detail) {
+        return MeetingSummary.builder()
+                .meetingId(detail.getMeetingId())
+                .title(detail.getTitle())
+                .content(detail.getContent())
+                .meetingPlace(detail.getMeetingPlace())
+                .meetingAddress(detail.getMeetingAddress())
+                .regionCode(detail.getRegionCode())
+                .meetingAt(detail.getMeetingAt())
+                .maxParticipants(detail.getMaxParticipants())
+                .currentParticipants(detail.getCurrentParticipants())
+                .status(detail.getStatus())
+                .gameNamesJson(detail.getGameNamesJson())
+                .host(detail.getHost())
+                .build();
     }
 }
