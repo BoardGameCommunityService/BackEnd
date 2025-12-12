@@ -1,6 +1,7 @@
 package com.boardmate.controller;
 
 import com.boardmate.domain.user.User;
+import com.boardmate.dto.meeting.ApprovedMeetingsResponse;
 import com.boardmate.dto.meeting.MeetingDetailResponse;
 import com.boardmate.dto.meeting.MyParticipationSummary;
 import com.boardmate.service.MeetingParticipantService;
@@ -41,15 +42,15 @@ public class MyParticipationController {
         return ResponseEntity.ok(meetingService.getHostMeetingList(user.getId(), page, size));
     }
 
-    @Operation(summary = "참여한 모임 목록", description = "승인된(approved) 모임 목록을 조회합니다. JWT 인증 필요")
+    @Operation(summary = "참여한 모임 목록", description = "승인된(approved) 모임 목록을 조회합니다. JWT 인증 필요. /upcoming /finished 구분 추가.")
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping("/approved")
     public ResponseEntity<?> approved(@Parameter(hidden = true) @AuthenticationPrincipal User user) {
         if (user == null) {
             return ResponseEntity.status(401).build();
         }
-        List<MeetingDetailResponse> items = participantService.getApprovedMeetings(user.getId());
-        return ResponseEntity.ok(items);
+        ApprovedMeetingsResponse response = participantService.getApprovedMeetingsWithStatus(user.getId());
+        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "신청 대기 모임 목록", description = "PENDING 상태의 모임 목록을 조회합니다. JWT 인증 필요")
