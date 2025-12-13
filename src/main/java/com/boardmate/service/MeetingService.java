@@ -95,7 +95,10 @@ public class MeetingService {
 
     @Transactional(readOnly = true)
     public Page<MeetingDetailResponse> getHostMeetingList(Long hostId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size,
+                org.springframework.data.domain.Sort.by(
+                        org.springframework.data.domain.Sort.Order.desc("meetingAt"),
+                        org.springframework.data.domain.Sort.Order.desc("id")));
         return meetingRepository.findByHostId(hostId, pageable)
                 .map(meeting -> getDetail(meeting.getId()));
     }
