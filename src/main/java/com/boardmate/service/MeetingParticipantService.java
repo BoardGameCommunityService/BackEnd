@@ -190,6 +190,16 @@ public class MeetingParticipantService {
                 result.add(meetingService.getDetail(meetingId));
             }
         }
+        // meetingAt 최신순, 동률 시 meetingId 최신순
+        result.sort((a, b) -> {
+            if (a.getMeetingAt() != null && b.getMeetingAt() != null) {
+                int cmp = b.getMeetingAt().compareTo(a.getMeetingAt());
+                if (cmp != 0) {
+                    return cmp;
+                }
+            }
+            return b.getMeetingId().compareTo(a.getMeetingId());
+        });
         return result;
     }
 
@@ -231,10 +241,8 @@ public class MeetingParticipantService {
             }
         }
 
-        // upcoming: meetingAt 오름차순 정렬
-        upcoming.sort((a, b) -> a.getMeetingAt().compareTo(b.getMeetingAt()));
-
-        // finished: meetingAt 내림차순 정렬
+        // 모든 목록 meetingAt 내림차순 (최신 먼저)
+        upcoming.sort((a, b) -> b.getMeetingAt().compareTo(a.getMeetingAt()));
         finished.sort((a, b) -> b.getMeetingAt().compareTo(a.getMeetingAt()));
 
         return ApprovedMeetingsResponse.builder()
