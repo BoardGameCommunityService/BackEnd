@@ -138,12 +138,11 @@ public class NotificationService {
     @Transactional(readOnly = true)
     public com.boardmate.dto.notification.NotificationsResponse getUserNotificationsMerged(Long userId, int page,
             int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        // 1) 영속 알림 (페이징)
-        Page<Notification> persisted = notificationRepository.findByUserId(userId, pageable);
+        // 1) 영속 알림 (전체 조회) — total이 page size에 따라 달라지는 문제 방지
+        List<Notification> persistedAll = notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
 
         List<com.boardmate.dto.notification.NotificationItem> items = new ArrayList<>();
-        for (Notification n : persisted.getContent()) {
+        for (Notification n : persistedAll) {
             items.add(com.boardmate.dto.notification.NotificationItem.builder()
                     .id(n.getId())
                     .type(n.getType())
