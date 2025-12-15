@@ -136,6 +136,16 @@ public class MeetingParticipantService {
         MeetingParticipant participant = participantRepository.findByMeetingIdAndUserId(meetingId, participantUserId)
                 .orElseThrow(() -> new RuntimeException("신청 기록을 찾을 수 없습니다."));
 
+        // 이미 승인된 경우
+        if ("APPROVED".equals(participant.getStatus())) {
+            throw new RuntimeException("이미 승인되었습니다.");
+        }
+
+        // 이미 반려된 경우
+        if ("DENIED".equals(participant.getStatus())) {
+            throw new RuntimeException("이미 반려되었습니다.");
+        }
+
         participant.setStatus("APPROVED");
         participant.setUpdatedAt(LocalDateTime.now());
         participantRepository.save(participant);
@@ -161,6 +171,16 @@ public class MeetingParticipantService {
 
         MeetingParticipant participant = participantRepository.findByMeetingIdAndUserId(meetingId, participantUserId)
                 .orElseThrow(() -> new RuntimeException("신청 기록을 찾을 수 없습니다."));
+
+        // 이미 반려된 경우
+        if ("DENIED".equals(participant.getStatus())) {
+            throw new RuntimeException("이미 반려되었습니다.");
+        }
+
+        // 이미 승인된 경우
+        if ("APPROVED".equals(participant.getStatus())) {
+            throw new RuntimeException("이미 승인되었습니다.");
+        }
 
         participant.setStatus("DENIED");
         participant.setUpdatedAt(LocalDateTime.now());
