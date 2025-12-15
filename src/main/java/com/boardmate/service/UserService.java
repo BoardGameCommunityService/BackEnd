@@ -202,7 +202,6 @@ public class UserService {
 
         // 알림 관련 정보
         boolean hasNewNotifications = notificationService.hasNotifications(userId);
-        long unreadCount = notificationService.getUnreadNotificationCount(userId);
 
         return MySummary.builder()
                 .userId(user.getId())
@@ -214,7 +213,6 @@ public class UserService {
                 .approvedCount(participationSummary.getApprovedCount())
                 .pendingCount(participationSummary.getPendingCount())
                 .hasNewNotifications(hasNewNotifications)
-                .unreadNotificationCount(unreadCount)
                 .build();
     }
 }

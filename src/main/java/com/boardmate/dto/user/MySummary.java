@@ -18,6 +18,5 @@ public class MySummary {
     private long pendingCount; // 신청 대기 모임 수
 
     // 알림 관련
-    private boolean hasNewNotifications; // 읽지 않은 알림 여부
-    private long unreadNotificationCount; // 읽지 않은 알림 개수
+    private boolean hasNewNotifications; // 알림 여부
 }
