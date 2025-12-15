@@ -158,9 +158,7 @@ public class NotificationService {
                     .message(n.getMessage())
                     .resourceId(n.getResourceId())
                     .relatedUserId(n.getRelatedUserId())
-                    .isRead(n.getIsRead())
                     .createdAt(n.getCreatedAt())
-                    .readAt(n.getReadAt())
                     .build());
         }
 
@@ -185,9 +183,7 @@ public class NotificationService {
                         .message("개설된 모임을 확인해보세요.")
                         .resourceId(latest.getId())
                         .relatedUserId(null)
-                        .isRead(false)
                         .createdAt(latest.getCreatedAt())
-                        .readAt(null)
                         .build());
             }
         }
@@ -209,35 +205,11 @@ public class NotificationService {
     }
 
     /**
-     * 읽지 않은 알림 개수
+     * 알림 여부 (읽음/읽지않음 무관)
      */
     @Transactional
-    public long getUnreadNotificationCount(Long userId) {
-        long persisted = notificationRepository.countByUserIdAndIsReadFalse(userId);
-
-        // 동적 지역 알림 수: 동일 지역에 미래 모임이 존재하면 1로 집계
-        long dynamic = 0;
-        User user = userRepository.findById(userId).orElse(null);
-        if (user != null) {
-            NotificationSetting setting = settingRepository.findByUserId(userId)
-                    .orElseGet(() -> createDefaultNotificationSetting(user));
-            if (Boolean.TRUE.equals(setting.getIsEnabled()) && user.getRegion() != null
-                    && !user.getRegion().isBlank()) {
-                boolean hasFuture = !meetingRepository
-                        .findByRegionCodeAndMeetingAtAfter(user.getRegion(), LocalDateTime.now()).isEmpty();
-                dynamic = hasFuture ? 1 : 0;
-            }
-        }
-
-        return persisted + dynamic;
-    }
-
-    /**
-     * 읽지 않은 알림 여부
-     */
-    @Transactional
-    public boolean hasUnreadNotifications(Long userId) {
-        if (notificationRepository.countByUserIdAndIsReadFalse(userId) > 0)
+    public boolean hasNotifications(Long userId) {
+        if (notificationRepository.countByUserId(userId) > 0)
             return true;
         User user = userRepository.findById(userId).orElse(null);
         if (user == null)
@@ -290,30 +262,6 @@ public class NotificationService {
         }
 
         return result;
-    }
-
-    /**
-     * 알림 읽음 표시
-     */
-    @Transactional
-    public void markAsRead(Long notificationId) {
-        Notification notification = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new RuntimeException("알림을 찾을 수 없습니다."));
-
-        notification.markAsRead();
-        notificationRepository.save(notification);
-    }
-
-    /**
-     * 모든 알림을 읽음 표시
-     */
-    @Transactional
-    public void markAllAsRead(Long userId) {
-        List<Notification> unreadNotifications = notificationRepository.findByUserIdAndIsReadFalse(userId);
-        for (Notification notification : unreadNotifications) {
-            notification.markAsRead();
-        }
-        notificationRepository.saveAll(unreadNotifications);
     }
 
     /**

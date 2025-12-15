@@ -51,54 +51,15 @@ public class NotificationController {
         return ResponseEntity.ok(items);
     }
 
-    @Operation(summary = "읽지 않은 알림 개수", description = "읽지 않은 알림의 개수를 조회합니다. JWT 인증 필요.")
-    @ApiResponse(responseCode = "200", description = "조회 성공")
-    @GetMapping("/unread-count")
-    public ResponseEntity<?> getUnreadCount(@Parameter(hidden = true) @AuthenticationPrincipal User user) {
-        if (user == null) {
-            return ResponseEntity.status(401).build();
-        }
-        long count = notificationService.getUnreadNotificationCount(user.getId());
-        return ResponseEntity.ok(Map.of("unreadCount", count));
-    }
-
-    @Operation(summary = "읽지 않은 알림 여부", description = "읽지 않은 알림이 있는지 확인합니다. JWT 인증 필요.")
+    @Operation(summary = "알림 여부", description = "알림이 있는지 확인합니다. JWT 인증 필요.")
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping("/has-unread")
     public ResponseEntity<?> hasUnread(@Parameter(hidden = true) @AuthenticationPrincipal User user) {
         if (user == null) {
             return ResponseEntity.status(401).build();
         }
-        boolean hasUnread = notificationService.hasUnreadNotifications(user.getId());
-        return ResponseEntity.ok(Map.of("hasUnread", hasUnread));
-    }
-
-    @Operation(summary = "알림 읽음 표시", description = "특정 알림을 읽음으로 표시합니다. JWT 인증 필요.")
-    @ApiResponse(responseCode = "200", description = "성공")
-    @PatchMapping("/{notificationId}/read")
-    public ResponseEntity<?> markAsRead(
-            @Parameter(hidden = true) @AuthenticationPrincipal User user,
-            @Parameter(description = "알림 ID") @PathVariable Long notificationId) {
-        if (user == null) {
-            return ResponseEntity.status(401).build();
-        }
-        try {
-            notificationService.markAsRead(notificationId);
-            return ResponseEntity.ok(Map.of("message", "알림이 읽음으로 표시되었습니다."));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(Map.of("error", e.getMessage()));
-        }
-    }
-
-    @Operation(summary = "모든 알림 읽음 표시", description = "모든 읽지 않은 알림을 읽음으로 표시합니다. JWT 인증 필요.")
-    @ApiResponse(responseCode = "200", description = "성공")
-    @PatchMapping("/read-all")
-    public ResponseEntity<?> markAllAsRead(@Parameter(hidden = true) @AuthenticationPrincipal User user) {
-        if (user == null) {
-            return ResponseEntity.status(401).build();
-        }
-        notificationService.markAllAsRead(user.getId());
-        return ResponseEntity.ok(Map.of("message", "모든 알림이 읽음으로 표시되었습니다."));
+        boolean hasNotifications = notificationService.hasNotifications(user.getId());
+        return ResponseEntity.ok(Map.of("hasNotifications", hasNotifications));
     }
 
     @Operation(summary = "알림 설정 조회", description = "사용자의 알림 설정을 조회합니다. JWT 인증 필요.")
