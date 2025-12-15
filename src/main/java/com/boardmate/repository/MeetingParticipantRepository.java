@@ -18,4 +18,6 @@ public interface MeetingParticipantRepository extends JpaRepository<MeetingParti
     List<MeetingParticipant> findByUserIdAndStatus(Long userId, String status);
 
     long countByUserIdAndStatus(Long userId, String status);
+
+    void deleteByUserId(Long userId);
 }

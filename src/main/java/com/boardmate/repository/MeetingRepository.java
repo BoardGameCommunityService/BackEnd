@@ -30,4 +30,6 @@ public interface MeetingRepository extends JpaRepository<Meeting, Long> {
 
     // 동적 지역 알림용: 사용자의 지역코드와 현재시점 이후 모임 조회
     java.util.List<Meeting> findByRegionCodeAndMeetingAtAfter(String regionCode, LocalDateTime now);
+
+    void deleteByHostId(Long hostId);
 }

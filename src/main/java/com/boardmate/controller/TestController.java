@@ -46,4 +46,17 @@ public class TestController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    @Operation(summary = "사용자 완전 삭제", description = "개발/테스트용 API입니다. 이메일로 사용자를 DB에서 완전히 제거합니다.")
+    @ApiResponse(responseCode = "200", description = "삭제 성공")
+    @ApiResponse(responseCode = "404", description = "사용자 없음")
+    @DeleteMapping("/user")
+    public ResponseEntity<?> deleteUser(@RequestParam String email) {
+        try {
+            userService.deleteUserByEmail(email);
+            return ResponseEntity.ok(java.util.Map.of("message", "사용자가 성공적으로 삭제되었습니다."));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(java.util.Map.of("error", e.getMessage()));
+        }
+    }
 }
