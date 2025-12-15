@@ -157,6 +157,7 @@ public class MeetingService {
                         .userId(p.getUser().getId())
                         .nickname(p.getUser().getNickname())
                         .avatarImageUrl(p.getUser().getProfileImageUrl())
+                        .status(p.getStatus())
                         .build())
                 .collect(Collectors.toList());
 
@@ -165,6 +166,7 @@ public class MeetingService {
                 .userId(meeting.getHost().getId())
                 .nickname(meeting.getHost().getNickname())
                 .avatarImageUrl(meeting.getHost().getProfileImageUrl())
+                .status(null)
                 .build());
 
         HostSummary hostSummary = HostSummary.builder()
