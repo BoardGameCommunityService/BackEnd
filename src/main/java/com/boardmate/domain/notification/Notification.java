@@ -38,11 +38,6 @@ public class Notification {
     @Column(name = "related_user_id")
     private Long relatedUserId;
 
-    @Column(nullable = false)
-    private Boolean isRead = false;
-
-    private LocalDateTime readAt;
-
     private LocalDateTime createdAt;
 
     @Builder
@@ -53,19 +48,10 @@ public class Notification {
         this.message = message;
         this.resourceId = resourceId;
         this.relatedUserId = relatedUserId;
-        this.isRead = false;
     }
 
     @PrePersist
     public void onCreate() {
         this.createdAt = LocalDateTime.now();
-        if (this.isRead == null) {
-            this.isRead = false;
-        }
-    }
-
-    public void markAsRead() {
-        this.isRead = true;
-        this.readAt = LocalDateTime.now();
     }
 }

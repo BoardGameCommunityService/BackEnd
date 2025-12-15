@@ -201,7 +201,7 @@ public class UserService {
         var participationSummary = meetingParticipantService.getMyParticipationSummary(userId);
 
         // 알림 관련 정보
-        boolean hasNewNotifications = notificationService.hasUnreadNotifications(userId);
+        boolean hasNewNotifications = notificationService.hasNotifications(userId);
         long unreadCount = notificationService.getUnreadNotificationCount(userId);
 
         return MySummary.builder()

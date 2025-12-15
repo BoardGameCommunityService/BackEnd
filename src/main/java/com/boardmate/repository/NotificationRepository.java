@@ -12,12 +12,10 @@ import java.util.List;
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
     Page<Notification> findByUserId(Long userId, Pageable pageable);
 
-    long countByUserIdAndIsReadFalse(Long userId);
+    long countByUserId(Long userId);
 
     @Query("SELECT n FROM Notification n WHERE n.user.id = :userId ORDER BY n.createdAt DESC")
     List<Notification> findByUserIdOrderByCreatedAtDesc(@Param("userId") Long userId);
-
-    List<Notification> findByUserIdAndIsReadFalse(Long userId);
 
     void deleteByUserIdAndTypeAndResourceIdAndRelatedUserId(Long userId, String type, Long resourceId,
             Long relatedUserId);
