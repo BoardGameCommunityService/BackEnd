@@ -143,7 +143,7 @@ public class NotificationService {
     /**
      * 알림 조회 (페이징)
      */
-    @Transactional(readOnly = true)
+    @Transactional
     public com.boardmate.dto.notification.NotificationsResponse getUserNotificationsMerged(Long userId, int page,
             int size) {
         // 1) 영속 알림 (전체 조회) — total이 page size에 따라 달라지는 문제 방지
