@@ -34,6 +34,10 @@ public class Notification {
     @Column(name = "resource_id")
     private Long resourceId;
 
+    // 신청자 Id
+    @Column(name = "related_user_id")
+    private Long relatedUserId;
+
     @Column(nullable = false)
     private Boolean isRead = false;
 
@@ -42,12 +46,13 @@ public class Notification {
     private LocalDateTime createdAt;
 
     @Builder
-    public Notification(User user, String type, String title, String message, Long resourceId) {
+    public Notification(User user, String type, String title, String message, Long resourceId, Long relatedUserId) {
         this.user = user;
         this.type = type;
         this.title = title;
         this.message = message;
         this.resourceId = resourceId;
+        this.relatedUserId = relatedUserId;
         this.isRead = false;
     }
 

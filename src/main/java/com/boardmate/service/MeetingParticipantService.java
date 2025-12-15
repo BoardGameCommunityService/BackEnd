@@ -72,7 +72,8 @@ public class MeetingParticipantService {
                 meeting.getHost().getId(),
                 meetingId,
                 user.getNickname(),
-                meeting.getTitle());
+                meeting.getTitle(),
+                userId);
 
         return buildParticipantsResponse(meetingId, meeting);
     }
@@ -86,6 +87,12 @@ public class MeetingParticipantService {
                 .orElseThrow(() -> new RuntimeException("신청 기록을 찾을 수 없습니다."));
 
         participantRepository.delete(participant);
+
+        // 신청 취소 시, 호스트에게 보낸 '모임 신청' 알림 삭제
+        notificationService.deleteMeetingApplicationNotification(
+                meeting.getHost().getId(),
+                meetingId,
+                userId);
 
         return buildParticipantsResponse(meetingId, meeting);
     }
