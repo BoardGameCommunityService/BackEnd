@@ -211,7 +211,7 @@ public class NotificationService {
     /**
      * 읽지 않은 알림 개수
      */
-    @Transactional(readOnly = true)
+    @Transactional
     public long getUnreadNotificationCount(Long userId) {
         long persisted = notificationRepository.countByUserIdAndIsReadFalse(userId);
 
@@ -235,7 +235,7 @@ public class NotificationService {
     /**
      * 읽지 않은 알림 여부
      */
-    @Transactional(readOnly = true)
+    @Transactional
     public boolean hasUnreadNotifications(Long userId) {
         if (notificationRepository.countByUserIdAndIsReadFalse(userId) > 0)
             return true;
@@ -319,7 +319,7 @@ public class NotificationService {
     /**
      * 알림 설정 조회
      */
-    @Transactional(readOnly = true)
+    @Transactional
     public NotificationSetting getNotificationSetting(Long userId) {
         return settingRepository.findByUserId(userId)
                 .orElseGet(() -> createDefaultNotificationSetting(
