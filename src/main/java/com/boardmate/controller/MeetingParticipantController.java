@@ -118,6 +118,10 @@ public class MeetingParticipantController {
                     code = "NOT_HOST";
                 } else if (message.contains("신청 기록을 찾을 수 없습니다")) {
                     code = "PARTICIPATION_NOT_FOUND";
+                } else if (message.contains("이미 승인되었습니다.")) {
+                    code = "ALREADY_APPROVED";
+                } else if (message.contains("이미 반려되었습니다.")) {
+                    code = "ALREADY_DENIED";
                 }
             }
 
@@ -151,6 +155,10 @@ public class MeetingParticipantController {
                     code = "NOT_HOST";
                 } else if (message.contains("신청 기록을 찾을 수 없습니다")) {
                     code = "PARTICIPATION_NOT_FOUND";
+                } else if (message.contains("이미 승인되었습니다.")) {
+                    code = "ALREADY_APPROVED";
+                } else if (message.contains("이미 반려되었습니다.")) {
+                    code = "ALREADY_DENIED";
                 }
             }
 
