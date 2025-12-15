@@ -17,4 +17,6 @@ public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
 
     // 전체 문의 목록 (관리자용)
     List<Inquiry> findAllByOrderByCreatedAtDesc();
+
+    void deleteByUserId(Long userId);
 }

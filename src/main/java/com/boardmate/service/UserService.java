@@ -9,7 +9,7 @@ import com.boardmate.dto.auth.TokenRefreshResponse;
 import com.boardmate.dto.user.MySummary;
 import com.boardmate.dto.user.UpdateUserInfoRequest;
 import com.boardmate.dto.user.UserInfoResponse;
-import com.boardmate.repository.UserRepository;
+import com.boardmate.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +25,11 @@ public class UserService {
     private final JwtTokenProvider jwtTokenProvider;
     private final MeetingParticipantService meetingParticipantService;
     private final NotificationService notificationService;
+    private final MeetingRepository meetingRepository;
+    private final MeetingParticipantRepository meetingParticipantRepository;
+    private final InquiryRepository inquiryRepository;
+    private final NotificationRepository notificationRepository;
+    private final NotificationSettingRepository notificationSettingRepository;
 
     /**
      * 기존에 있던 "백엔드에서 자체 JWT 발급" 소셜 로그인 로직
@@ -214,5 +219,34 @@ public class UserService {
                 .pendingCount(participationSummary.getPendingCount())
                 .hasNewNotifications(hasNewNotifications)
                 .build();
+    }
+
+    /**
+     * 테스트용: 이메일로 사용자 완전 제거 (관련 모든 데이터 삭제)
+     */
+    @Transactional
+    public void deleteUserByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        Long userId = user.getId();
+
+        // 1. 알림 설정 삭제
+        notificationSettingRepository.deleteByUserId(userId);
+
+        // 2. 알림 삭제
+        notificationRepository.deleteByUserId(userId);
+
+        // 3. 모임 신청 삭제 (participant)
+        meetingParticipantRepository.deleteByUserId(userId);
+
+        // 4. 이 사용자가 호스트인 모임 삭제
+        meetingRepository.deleteByHostId(userId);
+
+        // 5. 문의 삭제
+        inquiryRepository.deleteByUserId(userId);
+
+        // 6. 사용자 삭제
+        userRepository.delete(user);
     }
 }
