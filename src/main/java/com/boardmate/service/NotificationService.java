@@ -33,7 +33,8 @@ public class NotificationService {
      * 알림 생성
      */
     @Transactional
-    public void createNotification(Long userId, String type, String title, String message, Long resourceId) {
+    public void createNotification(Long userId, String type, String title, String message, Long resourceId,
+            Long relatedUserId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
@@ -53,6 +54,7 @@ public class NotificationService {
                 .title(title)
                 .message(message)
                 .resourceId(resourceId)
+                .relatedUserId(relatedUserId)
                 .build();
 
         notificationRepository.save(notification);
@@ -76,7 +78,8 @@ public class NotificationService {
                     "REGION_MEETING",
                     "지역 모임 개설",
                     region + " 지역에 새로운 모임 '" + meetingTitle + "'이 개설되었습니다.",
-                    meetingId);
+                    meetingId,
+                    null);
         }
     }
 
@@ -90,20 +93,23 @@ public class NotificationService {
                 "ANSWER",
                 "문의한 글에 답변이 도착했어요.",
                 "답변을 확인해보세요.",
-                inquiryId);
+                inquiryId,
+                null);
     }
 
     /**
      * 모임 신청 알림 (호스트에게)
      */
     @Transactional
-    public void notifyMeetingApplication(Long hostId, Long meetingId, String applicantName, String meetingTitle) {
+    public void notifyMeetingApplication(Long hostId, Long meetingId, String applicantName, String meetingTitle,
+            Long applicantId) {
         createNotification(
                 hostId,
                 "MEETING_APPLICATION",
                 "'" + applicantName + "'님이 모임 참가 신청을 보냈어요.",
                 "새로운 보드메이트를 만나보세요.",
-                meetingId);
+                meetingId,
+                applicantId);
     }
 
     /**
@@ -116,7 +122,8 @@ public class NotificationService {
                 "APPLICATION_APPROVED",
                 "모임 신청이 수락되었어요.",
                 "보드메이트와 함께 게임을 즐겨보세요.",
-                meetingId);
+                meetingId,
+                null);
     }
 
     /**
@@ -129,7 +136,8 @@ public class NotificationService {
                 "APPLICATION_DENIED",
                 "모임 신청이 반려되었어요.",
                 "아쉽지만 다른 모임에 참가해보세요.",
-                meetingId);
+                meetingId,
+                null);
     }
 
     /**
@@ -149,6 +157,7 @@ public class NotificationService {
                     .title(n.getTitle())
                     .message(n.getMessage())
                     .resourceId(n.getResourceId())
+                    .relatedUserId(n.getRelatedUserId())
                     .isRead(n.getIsRead())
                     .createdAt(n.getCreatedAt())
                     .readAt(n.getReadAt())
@@ -175,6 +184,7 @@ public class NotificationService {
                         .title(user.getRegion() + "에 새로운 모임이 개설되었어요!")
                         .message("개설된 모임을 확인해보세요.")
                         .resourceId(latest.getId())
+                        .relatedUserId(null)
                         .isRead(false)
                         .createdAt(latest.getCreatedAt())
                         .readAt(null)
@@ -348,5 +358,17 @@ public class NotificationService {
      */
     private boolean shouldSendNotification(NotificationSetting setting, String type) {
         return setting.getIsEnabled();
+    }
+
+    /**
+     * 모임 신청 알림 삭제 (신청 취소 시)
+     */
+    @Transactional
+    public void deleteMeetingApplicationNotification(Long hostId, Long meetingId, Long applicantUserId) {
+        notificationRepository.deleteByUserIdAndTypeAndResourceIdAndRelatedUserId(
+                hostId,
+                "MEETING_APPLICATION",
+                meetingId,
+                applicantUserId);
     }
 }

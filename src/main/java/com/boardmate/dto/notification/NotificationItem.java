@@ -13,6 +13,7 @@ public class NotificationItem {
     private String title;
     private String message;
     private Long resourceId;
+    private Long relatedUserId; // 신청자 ID
     private Boolean isRead; // null/false for dynamic
     private LocalDateTime createdAt;
     private LocalDateTime readAt;
