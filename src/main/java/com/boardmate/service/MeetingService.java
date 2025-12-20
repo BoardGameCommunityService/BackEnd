@@ -51,7 +51,7 @@ public class MeetingService {
 
         // 지역코드만 있는 경우
         if (!hasDate && hasRegionCode) {
-            return meetingRepository.findByRegionCode(regionCode, pageable)
+            return meetingRepository.findByRegionCodeContaining(regionCode, pageable)
                     .map(meeting -> getDetail(meeting.getId()));
         }
 
@@ -76,7 +76,8 @@ public class MeetingService {
             }
 
             // 날짜와 지역코드 둘 다 있는 경우
-            return meetingRepository.findByRegionCodeAndMeetingAtBetween(regionCode, startOfDay, endOfDay, pageable)
+            return meetingRepository
+                    .findByRegionCodeContainingAndMeetingAtBetween(regionCode, startOfDay, endOfDay, pageable)
                     .map(meeting -> getDetail(meeting.getId()));
         } catch (Exception e) {
             throw new RuntimeException("Invalid date format or value. Use YYYYMMDD");

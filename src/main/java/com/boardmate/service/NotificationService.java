@@ -171,7 +171,7 @@ public class NotificationService {
 
         if (Boolean.TRUE.equals(setting.getIsEnabled()) && user.getRegion() != null && !user.getRegion().isBlank()) {
             List<com.boardmate.domain.meeting.Meeting> futureMeetings = meetingRepository
-                    .findByRegionCodeAndMeetingAtAfter(user.getRegion(), LocalDateTime.now());
+                    .findByRegionCodeContainingAndMeetingAtAfter(user.getRegion(), LocalDateTime.now());
             if (!futureMeetings.isEmpty()) {
                 com.boardmate.domain.meeting.Meeting latest = futureMeetings.stream()
                         .max(Comparator.comparing(com.boardmate.domain.meeting.Meeting::getCreatedAt))
@@ -220,7 +220,8 @@ public class NotificationService {
             return false;
         if (user.getRegion() == null || user.getRegion().isBlank())
             return false;
-        return !meetingRepository.findByRegionCodeAndMeetingAtAfter(user.getRegion(), LocalDateTime.now()).isEmpty();
+        return !meetingRepository.findByRegionCodeContainingAndMeetingAtAfter(user.getRegion(), LocalDateTime.now())
+                .isEmpty();
     }
 
     /**
@@ -236,7 +237,7 @@ public class NotificationService {
         }
 
         java.util.List<com.boardmate.domain.meeting.Meeting> meetings = meetingRepository
-                .findByRegionCodeAndMeetingAtAfter(user.getRegion(), LocalDateTime.now());
+                .findByRegionCodeContainingAndMeetingAtAfter(user.getRegion(), LocalDateTime.now());
 
         // 최신순 정렬 (meetingAt 오름차순이 필요하면 변경 가능)
         meetings.sort(java.util.Comparator.comparing(com.boardmate.domain.meeting.Meeting::getMeetingAt));
